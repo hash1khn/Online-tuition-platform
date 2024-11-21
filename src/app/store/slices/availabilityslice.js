@@ -7,7 +7,7 @@ export const getAvailability = createAsyncThunk(
   async (teacherId, { rejectWithValue }) => {
     try {
       const response = await axios.get(`/api/teachers/get-teacher-availability`, {
-        headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` }, // Adjust token storage as needed
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }, // Adjust token storage as needed
       });
       return response.data; // Return retrieved availability data
     } catch (error) {
@@ -22,7 +22,7 @@ export const saveAvailability = createAsyncThunk(
   async (availabilityData, { rejectWithValue }) => {
     try {
       const response = await axios.post('/api/teachers/save-teacher-availability', availabilityData, {
-        headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` }, // Adjust token storage as needed
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }, // Adjust token storage as needed
       });
       return response.data; // Return saved availability data
     } catch (error) {
@@ -37,7 +37,7 @@ export const updateAvailability = createAsyncThunk(
   async (availabilityData, { rejectWithValue }) => {
     try {
       const response = await axios.put('/api/teachers/update-teacher-availability', availabilityData, {
-        headers: { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` }, // Adjust token storage as needed
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }, // Adjust token storage as needed
       });
       return response.data; // Return updated availability data
     } catch (error) {
