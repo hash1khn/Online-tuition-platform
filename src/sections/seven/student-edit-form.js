@@ -220,6 +220,8 @@ export default function StudentEditForm({ currentStudent }) {
 StudentEditForm.propTypes = {
   currentStudent: PropTypes.shape({
     id: PropTypes.string.isRequired,
+    name: PropTypes.string, // Add this line
+    phone: PropTypes.string, 
     guardianName: PropTypes.string,
     guardianPhone: PropTypes.string,
     address: PropTypes.string,
