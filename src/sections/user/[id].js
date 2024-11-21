@@ -49,13 +49,12 @@ export default function TeacherProfile({ id }) {
         }}
       >
         <ProfileCover
-          role={teacher.role || 'N/A'}
-          name={teacher.displayName || 'Anonymous'}
-          avatarUrl={teacher.photoURL || '/default-avatar.png'}
+          name={teacher.name || 'Anonymous'}
+          avatarUrl={teacher.profile_picture || '/default-avatar.png'}
           coverUrl={teacher.coverURL || '/default-cover.jpg'}
           city_name={teacher.city_name || 'Unknown'}
           email={teacher.email || 'No email provided'}
-          phone={teacher.phone || 'No phone number provided'}
+          phone_number={teacher.phone_number || 'No phone number provided'}
         />
       </Card>
 

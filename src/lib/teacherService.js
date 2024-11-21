@@ -114,6 +114,7 @@ export async function getTeacherById(id) {
             u.phone_number, 
             u.gender, 
             u.dob, 
+            u.profile_picture,
             u.city_id, 
             u.area, 
             t.teaching_mode, 
@@ -138,7 +139,7 @@ export async function getTeacherById(id) {
         LEFT JOIN grade_levels gl ON tgl.grade_level_id = gl.grade_level_id
         LEFT JOIN teacher_subjects ts ON ts.teacher_id = t.teacher_id
         LEFT JOIN subjects s ON ts.subject_id = s.subject_id
-        WHERE t.user_id = $1
+        WHERE t.teacher_id = $1
         GROUP BY u.user_id, t.teacher_id, c.city_name, c.region
     `,
     [id]
@@ -263,6 +264,60 @@ export const getTeacherByUserId = async (userId) => {
     throw new Error('Failed to fetch teacher details'); // More generic error message
   }
 };
+export const getTeacherByUserIdNew = async (userId) => {
+  const queryText = `
+    SELECT 
+      u.user_id, 
+      u.email, 
+      u.name, 
+      u.phone_number, 
+      u.gender, 
+      u.dob, 
+      u.profile_picture,
+      u.city_id, 
+      u.area, 
+      t.teaching_mode, 
+      t.bio, 
+      t.is_verified, 
+      t.experience_years, 
+      t.education, 
+      t.rating, 
+      t.hourly_rate,
+      t.duration_per_session, 
+      c.city_name, 
+      c.region,
+      array_agg(DISTINCT lang.name) AS languages, 
+      array_agg(DISTINCT gl.sub_level) AS grade_levels, 
+      array_agg(DISTINCT s.name) AS subjects 
+    FROM teachers t
+    JOIN users u ON u.user_id = t.user_id
+    LEFT JOIN cities c ON u.city_id = c.city_id
+    LEFT JOIN teacher_languages tl ON tl.teacher_id = t.teacher_id
+    LEFT JOIN languages lang ON tl.language_id = lang.language_id
+    LEFT JOIN teacher_grade_levels tgl ON tgl.teacher_id = t.teacher_id
+    LEFT JOIN grade_levels gl ON tgl.grade_level_id = gl.grade_level_id
+    LEFT JOIN teacher_subjects ts ON ts.teacher_id = t.teacher_id
+    LEFT JOIN subjects s ON ts.subject_id = s.subject_id
+    WHERE t.user_id = $1
+    GROUP BY u.user_id, t.teacher_id, c.city_name, c.region
+  `;
+
+  const values = [userId];
+
+  try {
+    const result = await query(queryText, values);
+
+    // Check if a teacher exists for the provided user ID
+    if (result.rows.length > 0) {
+      return result.rows[0]; // Return all teacher details
+    }
+    return null; // Return null if no teacher found
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw new Error('Failed to fetch teacher details'); // More generic error message
+  }
+};
+
 
 export async function clearTeacherAvailability(teacher_id) {
   const text = `
