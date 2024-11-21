@@ -59,7 +59,7 @@ export function useNavData() {
             title: 'Update Profile',
             path: paths.dashboard.user.new,
             icon: ICONS.user,
-            roles: ['teacher'],
+            roles: ['teacher','student'],
           },
           {
             title: 'Setup Profile',

@@ -34,7 +34,9 @@ export const setSession = (accessToken) => {
     axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
     const decoded = jwtDecode(accessToken);
-    if (decoded?.exp * 1000 < Date.now()) {
+
+    // Check if decoded.exp exists and is a valid number
+    if (decoded?.exp && !isNaN(decoded.exp) && decoded.exp * 1000 < Date.now()) {
       console.warn('Token is expired.');
       localStorage.removeItem('accessToken');
       delete axios.defaults.headers.common.Authorization;
@@ -47,6 +49,7 @@ export const setSession = (accessToken) => {
     delete axios.defaults.headers.common.Authorization;
   }
 };
+
 
 // Check if token is expired
 export const tokenExpired = (exp) => {

@@ -192,16 +192,16 @@ export default function ProfileHome({ info, posts }) {
         </Stack>
       </Grid>
 
-      <Grid xs={12}>
+      {/* <Grid xs={12}>
         <Card sx={{ p: 3, boxShadow: 2, borderRadius: '16px' }}>
-          <CardHeader title="Posts" />
+          <CardHeader title="Posts" /> */}
           {/* <Stack spacing={3}>
             {posts.map((post) => (
               <ProfilePostItem key={post.id} post={post} />
             ))}
           </Stack> */}
-        </Card>
-      </Grid>
+        {/* </Card>
+      </Grid> */}
     </Grid>
   );
 }

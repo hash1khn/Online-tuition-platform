@@ -5,6 +5,7 @@ import { useEffect, useReducer, useCallback, useMemo } from 'react';
 import axios, { endpoints } from 'src/utils/axios';
 import { AuthContext } from './auth-context';
 import { isValidToken, setSession } from './utils'; // Ensure these are correctly defined in utils
+import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 
@@ -35,6 +36,7 @@ const STORAGE_KEY = 'accessToken';
 
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  
 
   // Initialize session
   const initialize = useCallback(async () => {
@@ -80,39 +82,23 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Register
-  const register = useCallback(async (formData) => {
-    console.log("Register function called with formData:", formData); // Log formData
-  
+  const register = useCallback(async (formData, onSuccess) => {
+    console.log("Register function called with formData:", formData);
+
     try {
       const response = await axios.post(endpoints.auth.register, formData);
-  
-      console.log("API response received:", response); // Log the full response object
-  
-      const { token, user } = response.data;
-  
-      console.log("Token received:", token); // Log the token
-      console.log("User received:", user); // Log the user object
-  
-      setSession(token); // Save token to storage and set headers
-      console.log("Session set successfully."); // Confirm session setting
-  
-      localStorage.setItem(STORAGE_KEY, token); // Save the token to localStorage
-      console.log("Token saved to localStorage:", localStorage.getItem(STORAGE_KEY)); // Confirm token saved
-  
+      const { user } = response.data;
+
+      console.log("User received from backend:", user);
+
+      // Dispatch the REGISTER action with the user data
       dispatch({ type: 'REGISTER', payload: { user } });
-      console.log("Dispatch called with user:", user); // Confirm dispatch success
+
+      // Call the success callback (e.g., redirect) if provided
+      if (onSuccess) onSuccess();
     } catch (error) {
-      console.error("Registration error:", error); // Log the full error object
-  
-      if (error.response) {
-        console.error("Error response data:", error.response.data); // Log the error response data
-        console.error("Error status:", error.response.status); // Log the status code
-        console.error("Error headers:", error.response.headers); // Log the headers
-      } else {
-        console.error("Error message:", error.message); // Log any other error messages
-      }
-  
-      throw new Error(error.response?.data?.message || "Registration failed");
+      console.error("Registration error:", error.response?.data?.message || 'Registration failed');
+      throw new Error(error.response?.data?.message || 'Registration failed');
     }
   }, []);
   

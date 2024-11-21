@@ -104,7 +104,7 @@ export default function JwtRegisterView() {
   
   const onSubmit = async (data) => {
     console.info('Form submitted with data:', data);
-
+  
     // Transform form data to match the required backend format
     const formData = {
       email: data.email,
@@ -119,21 +119,26 @@ export default function JwtRegisterView() {
     };
   
     try {
-
-      console.info('Submitting registration for:', formData);  
-      console.log('heleelle')
-      // Handle successful registration
-      await register?.(formData); 
-      console.log('djhasjkdg')
-
-      // If you still need to call the register function
-      reset();
-      setErrorMsg('');
-      router.push(returnTo || PATH_AFTER_SIGNUP);
-    } catch (error) { 
+      console.info('Transformed formData:', formData); // Log the transformed data
+  
+      // Attempt to register the user
+      console.log('Calling register function...');
+      await register?.(formData, () => {
+        console.log('Redirecting to login page...');
+        router.push(paths.auth.jwt.login); // Redirect after successful registration
+      });
+  
+      console.log('Registration successful. Resetting form...');
+      reset(); // Reset the form after successful registration
+      setErrorMsg(''); // Clear error messages
+    } catch (error) {
       console.error('Registration error:', error);
-      setErrorMsg(typeof error === 'string' ? error : error.message);
-      reset();
+  
+      // Handle error messages
+      setErrorMsg(
+        error.response?.data?.message || typeof error === 'string' ? error : 'Registration failed'
+      );
+      reset(); // Reset form even on error
     }
   };
 
