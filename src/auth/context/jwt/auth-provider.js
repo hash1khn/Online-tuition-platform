@@ -2,51 +2,31 @@
 
 import PropTypes from 'prop-types';
 import { useEffect, useReducer, useCallback, useMemo } from 'react';
-// utils
 import axios, { endpoints } from 'src/utils/axios';
-//
 import { AuthContext } from './auth-context';
-import { isValidToken, setSession } from './utils';
+import { isValidToken, setSession } from './utils'; // Ensure these are correctly defined in utils
 
 // ----------------------------------------------------------------------
 
-// NOTE:
-// We only build demo at basic level.
-// Customer will need to do some extra handling yourself if you want to extend the logic and other features...
-
-// ----------------------------------------------------------------------
-
+// Initial state
 const initialState = {
   user: null,
   loading: true,
 };
 
+// Reducer for managing auth state
 const reducer = (state, action) => {
-  if (action.type === 'INITIAL') {
-    return {
-      loading: false,
-      user: action.payload.user,
-    };
+  switch (action.type) {
+    case 'INITIAL':
+      return { loading: false, user: action.payload.user };
+    case 'LOGIN':
+    case 'REGISTER':
+      return { ...state, user: action.payload.user };
+    case 'LOGOUT':
+      return { ...state, user: null };
+    default:
+      return state;
   }
-  if (action.type === 'LOGIN') {
-    return {
-      ...state,
-      user: action.payload.user,
-    };
-  }
-  if (action.type === 'REGISTER') {
-    return {
-      ...state,
-      user: action.payload.user,
-    };
-  }
-  if (action.type === 'LOGOUT') {
-    return {
-      ...state,
-      user: null,
-    };
-  }
-  return state;
 };
 
 // ----------------------------------------------------------------------
@@ -56,39 +36,27 @@ const STORAGE_KEY = 'accessToken';
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  // Initialize session
   const initialize = useCallback(async () => {
-    try {
-      const accessToken = localStorage.getItem(STORAGE_KEY);
+    const accessToken = localStorage.getItem(STORAGE_KEY);
 
-      if (accessToken && isValidToken(accessToken)) {
-        setSession(accessToken);
+    if (accessToken && isValidToken(accessToken)) {
+      setSession(accessToken);
 
-        const response = await axios.get(endpoints.auth.me);
-
+      try {
+        const response = await axios.get(endpoints.auth.me); // Call /api/auth/me
         const { user } = response.data;
 
-        dispatch({
-          type: 'INITIAL',
-          payload: {
-            user,
-          },
-        });
-      } else {
-        dispatch({
-          type: 'INITIAL',
-          payload: {
-            user: null,
-          },
-        });
+        dispatch({ type: 'INITIAL', payload: { user } });
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+        setSession(null); // Clear session if the fetch fails
+        dispatch({ type: 'INITIAL', payload: { user: null } });
       }
-    } catch (error) {
-      console.error(error);
-      dispatch({
-        type: 'INITIAL',
-        payload: {
-          user: null,
-        },
-      });
+    } else {
+      console.warn('Token is invalid or expired.');
+      setSession(null);
+      dispatch({ type: 'INITIAL', payload: { user: null } });
     }
   }, []);
 
@@ -96,100 +64,82 @@ export function AuthProvider({ children }) {
     initialize();
   }, [initialize]);
 
-  // LOGIN
+  // Login
   const login = useCallback(async (email, password) => {
-    const data = {
-      email,
-      password,
-    };
-
-    const response = await axios.post(endpoints.auth.login, data);
-
-    const { token, user } = response.data;
-    console.log(user.role)
-      localStorage.setItem(STORAGE_KEY, token);
-      localStorage.setItem('userRole', user.role);
-    setSession(token);
-
-    dispatch({
-      type: 'LOGIN',
-      payload: {
-        user,
-      },
-    });
-  }, []);
-
-  // REGISTER
-  const register = useCallback(async (formData) => {
-    // Construct the data object with all required fields
-    const data = {
-      email: formData.email,
-      password: formData.password,
-      name: formData.name,
-      phone_number: formData.phone_number, // Add more fields as needed
-      gender: formData.gender,
-      dob: formData.dob, // Date of birth
-      city_id: formData.city_id,
-      area: formData.area,
-      role: formData.role, // E.g., 'teacher', 'student'
-      profile_picture: formData.profile_picture, // Optional
-    };
-  
     try {
-      // Make the registration request
-      const response = await axios.post(endpoints.auth.register, data);
-  
-      // Destructure response to get access token and user info
+      const response = await axios.post(endpoints.auth.login, { email, password });
       const { token, user } = response.data;
-  
-      // Store the access token in localStorage
+
+      setSession(token); // Save token to storage and set headers
       localStorage.setItem(STORAGE_KEY, token);
-  
-      // Dispatch the REGISTER action with the user data
-      dispatch({
-        type: 'REGISTER',
-        payload: {
-          user,
-        },
-      });
+      dispatch({ type: 'LOGIN', payload: { user } });
     } catch (error) {
-      console.error('Registration error:', error);
-      throw new Error(error.response?.data?.message || 'Registration failed');
+      console.error('Login error:', error.response?.data?.message || error.message);
+      throw new Error(error.response?.data?.message || 'Login failed');
     }
   }, []);
 
-  // LOGOUT
-  const logout = useCallback(async () => {
-    setSession(null);
-    dispatch({
-      type: 'LOGOUT',
-    });
+  // Register
+  const register = useCallback(async (formData) => {
+    console.log("Register function called with formData:", formData); // Log formData
+  
+    try {
+      const response = await axios.post(endpoints.auth.register, formData);
+  
+      console.log("API response received:", response); // Log the full response object
+  
+      const { token, user } = response.data;
+  
+      console.log("Token received:", token); // Log the token
+      console.log("User received:", user); // Log the user object
+  
+      setSession(token); // Save token to storage and set headers
+      console.log("Session set successfully."); // Confirm session setting
+  
+      localStorage.setItem(STORAGE_KEY, token); // Save the token to localStorage
+      console.log("Token saved to localStorage:", localStorage.getItem(STORAGE_KEY)); // Confirm token saved
+  
+      dispatch({ type: 'REGISTER', payload: { user } });
+      console.log("Dispatch called with user:", user); // Confirm dispatch success
+    } catch (error) {
+      console.error("Registration error:", error); // Log the full error object
+  
+      if (error.response) {
+        console.error("Error response data:", error.response.data); // Log the error response data
+        console.error("Error status:", error.response.status); // Log the status code
+        console.error("Error headers:", error.response.headers); // Log the headers
+      } else {
+        console.error("Error message:", error.message); // Log any other error messages
+      }
+  
+      throw new Error(error.response?.data?.message || "Registration failed");
+    }
+  }, []);
+  
+
+  // Logout
+  const logout = useCallback(() => {
+    setSession(null); // Clear session and remove token
+    dispatch({ type: 'LOGOUT' });
   }, []);
 
-  // ----------------------------------------------------------------------
-
-  const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
-
-  const status = state.loading ? 'loading' : checkAuthenticated;
-
+  // Memoize context value
   const memoizedValue = useMemo(
     () => ({
       user: state.user,
       method: 'jwt',
-      loading: status === 'loading',
-      authenticated: status === 'authenticated',
-      unauthenticated: status === 'unauthenticated',
-      //
+      loading: state.loading,
+      authenticated: !!state.user,
       login,
       register,
       logout,
     }),
-    [login, logout, register, state.user, status]
+    [state.user, state.loading, login, register, logout]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
 }
 
 AuthProvider.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node.isRequired,
 };

@@ -202,7 +202,7 @@ const handleDrop = useCallback(
                 }
               />
             </Box>
-            {currentUser && (
+            {/* {currentUser && (
               <FormControlLabel
                 labelPlacement="start"
                 control={
@@ -223,14 +223,14 @@ const handleDrop = useCallback(
                 label={<Typography variant="subtitle2">Banned</Typography>}
                 sx={{ mx: 0, mb: 3, width: 1, justifyContent: 'space-between' }}
               />
-            )}
-            {currentUser && (
+            )} */}
+            {/* {currentUser && (
               <Stack justifyContent="center" alignItems="center" sx={{ mt: 3 }}>
                 <Button variant="soft" color="error">
                   Delete User
                 </Button>
               </Stack>
-            )}
+            )} */}
           </Card>
         </Grid>
 

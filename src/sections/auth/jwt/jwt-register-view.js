@@ -28,12 +28,13 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 import { useSearchParams, useRouter } from 'src/routes/hooks';
-import { PATH_AFTER_LOGIN } from 'src/config-global';
+import { PATH_AFTER_SIGNUP } from 'src/config-global';
 import { useAuthContext } from 'src/auth/hooks';
 import Iconify from 'src/components/iconify';
 import { RHFSelect } from 'src/components/hook-form/rhf-select';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { RHFTextField } from 'src/components/hook-form';
+
 
 export default function JwtRegisterView() {
   const { control, watch, setValue } = useForm();
@@ -118,12 +119,17 @@ export default function JwtRegisterView() {
     };
   
     try {
+
       console.info('Submitting registration for:', formData);  
+      console.log('heleelle')
       // Handle successful registration
-      await register(formData); // If you still need to call the register function
+      await register?.(formData); 
+      console.log('djhasjkdg')
+
+      // If you still need to call the register function
       reset();
       setErrorMsg('');
-      router.push(paths.auth.jwt.login); // Redirect after successful registration
+      router.push(returnTo || PATH_AFTER_SIGNUP);
     } catch (error) { 
       console.error('Registration error:', error);
       setErrorMsg(typeof error === 'string' ? error : error.message);

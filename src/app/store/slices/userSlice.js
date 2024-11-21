@@ -7,7 +7,7 @@ export const saveUser = createAsyncThunk('user/saveUser', async (userData, { rej
       method: 'PUT', // Change method to PUT
       headers: { 
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`, // Access token from sessionStorage
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Access token from sessionStorage
       },
       body: JSON.stringify(userData), // Send the user data
     });
@@ -26,7 +26,7 @@ export const getUserById = createAsyncThunk(
       const response = await fetch(`/api/user`, { // Ensure this matches your API endpoint
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`, // Use the correct token
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Use the correct token
         },
       });
 

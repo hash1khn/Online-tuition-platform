@@ -8,7 +8,7 @@ export const saveUser = createAsyncThunk(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify(userData),
       });
@@ -34,7 +34,7 @@ export const updateUser = createAsyncThunk(
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionStorage.getItem('accessToken')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify(userData),
       });
