@@ -28,7 +28,7 @@ dashboard: {
       root: `${ROOTS.DASHBOARD}/group`,
       five: `${ROOTS.DASHBOARD}/group/five`,
       six: `${ROOTS.DASHBOARD}/group/six`,
-      seven: `${ROOTS.DASHBOARD}/seven`,
+      seven: `${ROOTS.DASHBOARD}/group/seven`,
     },
     user: {
       root: `${ROOTS.DASHBOARD}/user`,

@@ -58,7 +58,7 @@ export function AuthProvider({ children }) {
 
   const initialize = useCallback(async () => {
     try {
-      const accessToken = sessionStorage.getItem(STORAGE_KEY);
+      const accessToken = localStorage.getItem(STORAGE_KEY);
 
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken);
@@ -107,8 +107,8 @@ export function AuthProvider({ children }) {
 
     const { token, user } = response.data;
     console.log(user.role)
-      sessionStorage.setItem(STORAGE_KEY, token);
-      sessionStorage.setItem('userRole', user.role);
+      localStorage.setItem(STORAGE_KEY, token);
+      localStorage.setItem('userRole', user.role);
     setSession(token);
 
     dispatch({
@@ -142,8 +142,8 @@ export function AuthProvider({ children }) {
       // Destructure response to get access token and user info
       const { token, user } = response.data;
   
-      // Store the access token in sessionStorage
-      sessionStorage.setItem(STORAGE_KEY, token);
+      // Store the access token in localStorage
+      localStorage.setItem(STORAGE_KEY, token);
   
       // Dispatch the REGISTER action with the user data
       dispatch({

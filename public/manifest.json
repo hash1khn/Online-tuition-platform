@@ -1,6 +1,6 @@
 {
-  "name": "Minimal UI",
-  "short_name": "Minimal UI",
+  "name": "Tutorly UI",
+  "short_name": "Tutorly UI",
   "display": "standalone",
   "start_url": "/",
   "theme_color": "#000000",

@@ -6,21 +6,21 @@ const developers = [
   {
     name: 'Dev 1',
     image: '/assets/hashir.jpeg', // Correct path for Next.js
-    description: 'Hashir',
+    description: 'Hashir\nPod',
     linkedIn: '#',
     github: '#',
   },
   {
     name: 'Dev 2',
     image: '/assets/kainat.jpg', // Correct path for Next.js
-    description: 'Kainat',
+    description: 'Kainat\nBoth',
     linkedIn: '#',
     github: '#',
   },
   {
     name: 'Dev 3',
     image: '/assets/raahim1.jpg', // Correct path for Next.js
-    description: 'Raahim',
+    description: 'Raahim\nCigarette',
     linkedIn: '#',
     github: '#',
   },

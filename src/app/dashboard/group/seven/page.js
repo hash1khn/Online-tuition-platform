@@ -1,5 +1,5 @@
 // sections
-import SevenView from 'src/sections/six/view';
+import SevenView from 'src/sections/seven/view';
 
 // ----------------------------------------------------------------------
 

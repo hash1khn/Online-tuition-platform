@@ -109,6 +109,14 @@ export function useNavData() {
             icon: ICONS.user,
             roles: ['student'],
           },
+          {
+          title: 'Student profile',
+          path:paths.dashboard.group.seven,
+          icon: ICONS.user,
+          roles: ['student'],
+        },
+        
+    
           // {
           //   title: 'Reviews',
           //   path:paths.dashboard.group.four,
