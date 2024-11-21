@@ -1,19 +1,10 @@
 import { useMemo } from 'react';
-
-// routes
-
 import { paths } from 'src/routes/paths';
-// components
 import SvgColor from 'src/components/svg-color';
 
-// ----------------------------------------------------------------------
-
+// Define icons
 const icon = (name) => (
   <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />
-  // OR
-  // <Iconify icon="fluent:mail-24-filled" />
-  // https://icon-sets.iconify.design/solar/
-  // https://www.streamlinehq.com/icons
 );
 
 const ICONS = {
@@ -31,7 +22,6 @@ const ICONS = {
   kanban: icon('ic_kanban'),
   folder: icon('ic_folder'),
   banking: icon('ic_banking'),
-
   booking: icon('ic_booking'),
   invoice: icon('ic_invoice'),
   product: icon('ic_product'),
@@ -42,16 +32,11 @@ const ICONS = {
   ecommerce: icon('ic_ecommerce'),
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
-  
 };
 
-// ----------------------------------------------------------------------
-
-export function useNavData() {
+export function useNavData(teacherId) {
   const data = useMemo(
     () => [
-      // OVERVIEW
-      // ----------------------------------------------------------------------
       {
         subheader: 'New Tutor',
         items: [
@@ -59,7 +44,13 @@ export function useNavData() {
             title: 'Update Profile',
             path: paths.dashboard.user.new,
             icon: ICONS.user,
-            roles: ['teacher','student'],
+            roles: ['teacher', 'student'],
+          },
+          {
+            title: 'Student profile',
+            path: paths.dashboard.group.seven,
+            icon: ICONS.user,
+            roles: ['student'],
           },
           {
             title: 'Setup Profile',
@@ -71,7 +62,7 @@ export function useNavData() {
             title: 'Terms & Conditions',
             path: paths.dashboard.one,
             icon: ICONS.order,
-            roles: ['teacher',],
+            roles: ['teacher'],
           },
           {
             title: 'Availability',
@@ -85,16 +76,17 @@ export function useNavData() {
             icon: ICONS.analytics,
             roles: ['teacher'],
           },
-          {
-            title: 'Devs',
-            path: paths.dashboard.group.six,
-            icon: ICONS.ecommerce,
-            roles: ['teacher','student'],
-          },
+         
           {
             title: 'Teachers Cards',
-            path:paths.dashboard.user.cards,
+            path: paths.dashboard.user.cards,
             icon: ICONS.dashboard,
+            roles: ['student'],
+          },
+          {
+            title: 'Teachers profile',
+            path: paths.dashboard.user.id(teacherId), // Ensure teacherId is passed
+            icon: ICONS.user,
             roles: ['student'],
           },
           {
@@ -103,51 +95,16 @@ export function useNavData() {
             icon: ICONS.analytics,
             roles: ['student'],
           },
-          {
-            title: 'Teachers profile',
-            path:paths.dashboard.user.root,
-            icon: ICONS.user,
-            roles: ['student'],
-          },
-          {
-          title: 'Student profile',
-          path:paths.dashboard.group.seven,
-          icon: ICONS.user,
-          roles: ['student'],
-        },
-        
-    
           // {
-          //   title: 'Reviews',
-          //   path:paths.dashboard.group.four,
-          //   icon: ICONS.user,
-          //   roles: ['student'],
+          //   title: 'Devs',
+          //   path: paths.dashboard.group.six,
+          //   icon: ICONS.ecommerce,
+          //   roles: ['teacher', 'student'],
           // },
         ],
       },
-
-      // MANAGEMENT
-      // ----------------------------------------------------------------------
-      // {
-      //   subheader: 'management',
-      //   items: [
-      //     {
-      //       title: 'user',
-      //       path: paths.dashboard.user.root,
-      //       icon: ICONS.user,
-      //       children: [
-      //         { title: 'profile', path: paths.dashboard.user.root },
-      //         { title: 'cards', path: paths.dashboard.user.cards },
-      //         { title: 'list', path: paths.dashboard.user.list },
-      //         { title: 'create', path: paths.dashboard.user.new },
-      //         { title: 'edit', path: paths.dashboard.user.demo.edit },
-      //         // { title: 'account', path: paths.dashboard.user.account },
-      //       ],
-      //     },
-      //   ],
-      // },
     ],
-    []
+    [teacherId] // Dependency array includes teacherId to re-render when it changes
   );
 
   return data;

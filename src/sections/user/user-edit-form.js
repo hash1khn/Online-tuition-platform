@@ -10,7 +10,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { saveUser, updateUser } from 'src/app/store/slices/setupslice';
-import { fetchTeacherByUserId, selectTeacher } from 'src/app/store/slices/teacherslice';
+import { fetchTeacherByUserId1, selectTeacher } from 'src/app/store/slices/teacherslice';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
 import { useSnackbar } from 'src/components/snackbar';
@@ -60,7 +60,7 @@ export default function UserEditForm({ currentUser }) {
 
   useEffect(() => {
     if (!currentUser) {
-      dispatch(fetchTeacherByUserId());
+      dispatch(fetchTeacherByUserId1());
       console.log('mycurrent', currentUser);
     }
   }, [dispatch, currentUser]);

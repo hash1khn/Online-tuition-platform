@@ -23,10 +23,10 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
     <Box
       ref={ref}
       component="img"
-      src="/logo/w text (4).svg" // Adjust the path to match your file location
+      src="/logo/beelogo.png" // Adjust the path to match your file location
       sx={{
-        width: 70, // Increased width for a larger logo
-        height: 75, // Increased height for a larger logo
+        width: 110, // Increased width for a larger logo
+        height: 110, // Increased height for a larger logo
         display: 'inline-flex',
         ...sx,
       }}

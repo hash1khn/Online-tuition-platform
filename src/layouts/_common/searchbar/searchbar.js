@@ -29,15 +29,11 @@ import { applyFilter, groupedData, getAllItems } from './utils';
 
 function Searchbar() {
   const theme = useTheme();
-
   const router = useRouter();
-
   const search = useBoolean();
-
   const mdUp = useResponsive('up', 'md');
 
   const [searchQuery, setSearchQuery] = useState('');
-
   const navData = useNavData();
 
   const handleClose = useCallback(() => {
@@ -89,18 +85,19 @@ function Searchbar() {
 
             // Safeguard for match and parse
             const matchedTitle = match(title, searchQuery) || [];
-            const matchedPath = match(path, searchQuery) || [];
+            const resolvedPath = typeof path === 'function' ? path() : path; // Resolve path if it's a function
+            const matchedPath = match(resolvedPath, searchQuery) || [];
 
             const partsTitle = parse(title, matchedTitle);
-            const partsPath = parse(path, matchedPath);
+            const partsPath = parse(resolvedPath, matchedPath);
 
             return (
               <ResultItem
                 path={partsPath}
                 title={partsTitle}
-                key={`${title}${path}`}
+                key={`${title}${resolvedPath}`}
                 groupLabel={searchQuery && group}
-                onClickItem={() => handleClick(path)}
+                onClickItem={() => handleClick(resolvedPath)}
               />
             );
           })}

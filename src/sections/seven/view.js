@@ -7,26 +7,23 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // components
 import { useSettingsContext } from 'src/components/settings';
+import StudentEditForm from './student-edit-form';
 
 // ----------------------------------------------------------------------
 
-export default function SevenView() {
+export default function StudentEditView() {
   const settings = useSettingsContext();
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-      <Typography variant="h4"> Page Five </Typography>
+      <Typography variant="h4" gutterBottom>
+        Complete your student profile
+      </Typography>
+      <Typography variant="body1" sx={{ mb: 3 }}>
+        Please fill in the form below to update or complete your profile.
+      </Typography>
 
-      <Box
-        sx={{
-          mt: 5,
-          width: 1,
-          height: 320,
-          borderRadius: 2,
-          bgcolor: (theme) => alpha(theme.palette.grey[500], 0.04),
-          border: (theme) => `dashed 1px ${theme.palette.divider}`,
-        }}
-      />
+          <StudentEditForm />
     </Container>
   );
 }

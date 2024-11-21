@@ -9,7 +9,9 @@ import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
 import { paths } from 'src/routes/paths';
 import Divider from '@mui/material/Divider';
+import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
+import { RouterLink } from 'src/routes/components';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 
@@ -20,31 +22,26 @@ export default function UserCard({ user }) {
   const {
     name,
     students,
-    experience_years:experience,
+    experience_years: experience,
     profile_picture,
     languages = [],
     grade_levels: grades = [],
     subjects = [],
     hourly_rate: price,
     bio,
+    teacher_id,
   } = user;
 
-  // Function to handle navigation to profile page
-  const handleViewProfile = () => {
-    router.push(paths.dashboard.user.root); 
-    
- 
-  };
-  
+  // Debugging: Check if teacher_id is being received correctly
+  console.log("Teacher ID: ", teacher_id);
+  const linkTo = paths.dashboard.user.id(teacher_id);
 
   return (
     <Card sx={{ textAlign: 'left', padding: 2, maxWidth: 320, boxShadow: 3 }}>
       <Stack direction="row" alignItems="center" spacing={2}>
         <Avatar
           alt={name}
-          src={profile_picture
-      
-          }
+          src={profile_picture}
           sx={{
             width: 64,
             height: 64,
@@ -52,17 +49,9 @@ export default function UserCard({ user }) {
         />
         <Box>
           {/* Add onClick to the name */}
-          <Typography
-            variant="h6"
-            sx={{
-              cursor: 'pointer',
-              color: theme.palette.primary.main,
-              '&:hover': { textDecoration: 'underline' },
-            }}
-            onClick={handleViewProfile} // Call handleViewProfile on click
-          >
+          <Link component={RouterLink} href={linkTo} color="inherit" variant="subtitle2" noWrap>
             {name}
-          </Typography>
+          </Link>
           <Typography variant="body2" color="text.secondary">
             {experience} yr. experience | {students} students
           </Typography>
@@ -121,13 +110,14 @@ export default function UserCard({ user }) {
 UserCard.propTypes = {
   user: PropTypes.shape({
     name: PropTypes.string.isRequired,
-    experience_years: PropTypes.oneOfType([PropTypes.string, PropTypes.number]), // Corrected prop name
+    experience_years: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     students: PropTypes.number.isRequired,
     profile_picture: PropTypes.string.isRequired,
     bio: PropTypes.string.isRequired,
     languages: PropTypes.arrayOf(PropTypes.string),
-    grade_levels: PropTypes.arrayOf(PropTypes.string), // Corrected prop name
+    grade_levels: PropTypes.arrayOf(PropTypes.string),
     subjects: PropTypes.arrayOf(PropTypes.string),
-    hourly_rate: PropTypes.number, // Corrected prop name
+    hourly_rate: PropTypes.number,
+    teacher_id: PropTypes.number,
   }).isRequired,
 };

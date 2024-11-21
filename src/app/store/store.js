@@ -5,6 +5,7 @@ import availabiltyReducer from './slices/availabilityslice';
 import serviceReducer from './slices/serviceslice';
 import setupReducer from './slices/setupslice';
 import teacherReducer from './slices/teacherslice'; 
+import studentReducer from './slices/studentslice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     service: serviceReducer,
     setup: setupReducer,
     teachers: teacherReducer,
+    students: studentReducer
   },
   // Ensure Redux DevTools is enabled
   devTools: process.env.NODE_ENV !== 'production',
