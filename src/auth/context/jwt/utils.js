@@ -35,8 +35,8 @@ export const setSession = (accessToken) => {
 
     const decoded = jwtDecode(accessToken);
 
-    // Check if the token is expired
-    if (decoded?.exp * 1000 < Date.now()) {
+    // Safely check if decoded.exp exists and is valid
+    if (decoded?.exp && decoded.exp * 1000 < Date.now()) {
       console.warn('Token is expired.');
       localStorage.removeItem('accessToken');
       delete axios.defaults.headers.common.Authorization;
@@ -49,6 +49,7 @@ export const setSession = (accessToken) => {
     delete axios.defaults.headers.common.Authorization;
   }
 };
+
 
 
 
