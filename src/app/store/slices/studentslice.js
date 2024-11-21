@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+// Async thunk for saving student data
 export const saveStudentData = createAsyncThunk(
   'student/saveStudentData',
   async (studentData, { rejectWithValue }) => {
@@ -7,6 +8,22 @@ export const saveStudentData = createAsyncThunk(
       // Simulating an API call
       const response = await new Promise((resolve) =>
         setTimeout(() => resolve(studentData), 1500)
+      );
+      return response;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for updating student data
+export const updateStudent = createAsyncThunk(
+  'student/updateStudent',
+  async (updatedData, { rejectWithValue }) => {
+    try {
+      // Simulating an API call
+      const response = await new Promise((resolve) =>
+        setTimeout(() => resolve(updatedData), 1500)
       );
       return response;
     } catch (error) {
@@ -65,6 +82,7 @@ const studentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Save student data reducers
       .addCase(saveStudentData.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -74,6 +92,20 @@ const studentSlice = createSlice({
         Object.assign(state, action.payload);
       })
       .addCase(saveStudentData.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Update student data reducers
+      .addCase(updateStudent.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateStudent.fulfilled, (state, action) => {
+        state.loading = false;
+        Object.assign(state, action.payload);
+      })
+      .addCase(updateStudent.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
