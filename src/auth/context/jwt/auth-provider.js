@@ -5,7 +5,6 @@ import { useEffect, useReducer, useCallback, useMemo } from 'react';
 import axios, { endpoints } from 'src/utils/axios';
 import { AuthContext } from './auth-context';
 import { isValidToken, setSession } from './utils'; // Ensure these are correctly defined in utils
-import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 
