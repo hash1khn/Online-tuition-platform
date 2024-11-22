@@ -17,10 +17,10 @@ export const fetchTeachers = createAsyncThunk(
   }
 );
 
-export const fetchTeacherByUserId1 = createAsyncThunk('teachers/fetchTeacherByUserId', async () => {
+export const fetchTeacherByUserId1 = createAsyncThunk('teachers/fetchTeacherByUserId1', async () => {
   try {
     // Retrieve token from sessionStorage
-    const token = sessionStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       throw new Error('No token found. Please log in.');
     }
@@ -79,7 +79,6 @@ export const fetchTeacherByUserId = createAsyncThunk(
   }
 );
 
-// Teacher slice
 const teacherSlice = createSlice({
   name: 'teachers',
   initialState: {
@@ -117,6 +116,20 @@ const teacherSlice = createSlice({
       .addCase(fetchTeacherByUserId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to fetch teacher';
+      })
+
+      // Handling fetchTeacherByUserId1 thunk
+      .addCase(fetchTeacherByUserId1.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchTeacherByUserId1.fulfilled, (state, action) => {
+        state.loading = false;
+        state.teacher = action.payload; // Store fetched teacher by user ID
+      })
+      .addCase(fetchTeacherByUserId1.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch teacher by user ID';
       });
   },
 });

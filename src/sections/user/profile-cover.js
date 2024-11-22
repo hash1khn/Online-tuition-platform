@@ -7,13 +7,40 @@ import ListItemText from '@mui/material/ListItemText';
 import { useTheme, alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 // theme
 import { bgGradient } from 'src/theme/css';
+// icons
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+
+const convertToInternationalFormat = (phoneNumber) => {
+  if (!phoneNumber.startsWith('+92') && phoneNumber.startsWith('0')) {
+    // Replace leading '0' with '+92' for Pakistan
+    return phoneNumber.replace(/^0/, '+92');
+  }
+  return phoneNumber; // Return as-is if already in international format
+};
 
 // ----------------------------------------------------------------------
 
-export default function ProfileCover({ name, avatarUrl, role, coverUrl, phone_number, email, city_name }) {
+export default function ProfileCover({
+  name,
+  role,
+  phone_number,
+  email,
+  city_name,
+  coverUrl,
+  profile_picture,
+}) {
   const theme = useTheme();
+
+  const handleWhatsAppClick = () => {
+    if (phone_number) {
+      const formattedPhoneNumber = convertToInternationalFormat(phone_number);
+      const whatsappUrl = `https://wa.me/${formattedPhoneNumber}`;
+      window.open(whatsappUrl, '_blank'); // Open WhatsApp in a new tab
+    }
+  };
 
   return (
     <Box
@@ -37,7 +64,7 @@ export default function ProfileCover({ name, avatarUrl, role, coverUrl, phone_nu
         }}
       >
         <Avatar
-          src={avatarUrl}
+          src={profile_picture}
           alt={name}
           sx={{
             mx: 'auto',
@@ -57,44 +84,52 @@ export default function ProfileCover({ name, avatarUrl, role, coverUrl, phone_nu
           primary={name}
           secondary={
             <>
-              <Typography variant="body2"
-              sx={{
-                opacity: 0.7,
-                color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary',
-              }}
-            >
-                {role}
-              </Typography>
               {phone_number && (
-                <Typography variant="body2" 
-                sx={{
-                  opacity: 0.7,
-                  mt: 0.5,
-                  color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary', 
-                }}
-              >
-                  📞 {phone_number}
-                </Typography>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Box
+                    onClick={handleWhatsAppClick}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      opacity: 0.7,
+                      '&:hover': { opacity: 1 },
+                    }}
+                  >
+                    <WhatsAppIcon sx={{ mr: 0.5, color: 'common.white' }} />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 0.5,
+                        color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary',
+                      }}
+                    >
+                      {phone_number}
+                    </Typography>
+                  </Box>
+                </Stack>
               )}
               {email && (
-                <Typography variant="body2" 
-                sx={{
-                  opacity: 0.7,
-                  mt: 0.5,
-                  color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary', 
-                }}
-              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    opacity: 0.7,
+                    mt: 0.5,
+                    color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary',
+                  }}
+                >
                   ✉️ {email}
                 </Typography>
               )}
               {city_name && (
-                <Typography variant="body2" 
-                sx={{
-                  opacity: 0.7,
-                  mt: 0.5,
-                  color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary', 
-                }}
-              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    opacity: 0.7,
+                    mt: 0.5,
+                    color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary',
+                  }}
+                >
                   📍 {city_name}
                 </Typography>
               )}
@@ -125,11 +160,11 @@ export default function ProfileCover({ name, avatarUrl, role, coverUrl, phone_nu
 }
 
 ProfileCover.propTypes = {
-  avatarUrl: PropTypes.string,
-  coverUrl: PropTypes.string,
-  name: PropTypes.string,
-  role: PropTypes.string,
+  name: PropTypes.string.isRequired,
+  role: PropTypes.string.isRequired,
   phone_number: PropTypes.string,
   email: PropTypes.string,
   city_name: PropTypes.string,
+  coverUrl: PropTypes.string.isRequired,
+  profile_picture: PropTypes.string.isRequired,
 };

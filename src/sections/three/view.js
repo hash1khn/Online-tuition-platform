@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import {
   Box,
   Container,
@@ -23,16 +23,16 @@ import * as Yup from 'yup';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { useDispatch, useSelector } from 'react-redux';
-import { saveService } from 'src/app/store/slices/serviceslice';
-
+import { saveService,fetchGradeLevels,fetchSubjects } from 'src/app/store/slices/serviceslice';
+import { fetchTeacherByUserId1 } from 'src/app/store/slices/teacherslice';
 
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 // Sample domains data
-const domains = [
-  { domain: 'O-level', subLevels: ['O1', 'O2', 'O3'] },
-  { domain: 'A-level', subLevels: ['AS', 'A2'] },
-  { domain: 'Intermediate', subLevels: ['Part 1', 'Part 2'] },
-];
+// const domains = [
+//   { domain: 'O-level', subLevels: ['O1', 'O2', 'O3'] },
+//   { domain: 'A-level', subLevels: ['AS', 'A2'] },
+//   { domain: 'Intermediate', subLevels: ['Part 1', 'Part 2'] },
+// ];
 
 
 const subjects = [
@@ -72,6 +72,8 @@ export default function Service(currentUser) {
     const [isBackLoading, setIsBackLoading] = useState(false);
   const [successBar, setSuccessBar] = useState(false);
   const dispatch = useDispatch();
+  const { subjects, gradeLevels, loading } = useSelector((state) => state.service);
+
   const service = useSelector((state) => state.service);
 
   // React Hook Form setup
@@ -94,11 +96,28 @@ export default function Service(currentUser) {
     handleSubmit,
     formState: { errors }, 
   } = methods;
+  useEffect(() => {
+    dispatch(fetchSubjects());
+    dispatch(fetchGradeLevels());
+  }, [dispatch]);
 
 const onSubmit = (data) => {
   try {
-    console.log('Form values:', data);
-    dispatch(saveService(data));
+    const gradeLevelIds = data.subLevel.map((subLevel) => 
+      gradeLevels.find((level) => level.sub_level === subLevel)?.grade_level_id
+    );
+    const subjectIds = data.subject.map((subject) => 
+      subjects.find((subj) => subj.name === subject)?.subject_id
+    );
+    const payload = {
+      hourly_rate: data.fees, 
+      duration_per_session: data.duration,
+      grade_levels: gradeLevelIds,
+      subjects: subjectIds,
+    };
+    console.log('Submitting Payload:', payload);
+
+    dispatch(saveService(payload));
     setSuccessBar(true);
   } catch (error) {
     console.error('Submission error:', error);
@@ -155,8 +174,8 @@ const onSubmit = (data) => {
     render={({ field }) => (
       <Select labelId="subject-label" label="Choose Subject(s)" multiple {...field}>
         {subjects.map((subject) => (
-          <MenuItem key={subject} value={subject}>
-            {subject}
+          <MenuItem key={subject.subject_id} value={subject.name}>
+            {subject.name}
           </MenuItem>
         ))}
       </Select>
@@ -168,72 +187,75 @@ const onSubmit = (data) => {
 
 
                   {/* Dropdown for Domain */}
-                  <FormControl fullWidth sx={{ mb: 5 }} error={Boolean(errors.domain)}>
-                    <InputLabel id="domain-label">Choose Domain</InputLabel>
-                    <Controller
-                      name="domain"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          labelId="domain-label"
-                          label="Choose Domain(s)"
-                          multiple
-                          value={selectedDomain}
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleDomainSelect(e);
-                          }}
-                        >
-                          {domains.map((domainObj) => (
-                            <MenuItem key={domainObj.domain} value={domainObj.domain}>
-                              {domainObj.domain}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      )}
-                    />
-                    {errors.domain && (
-                      <Typography color="error">{errors.domain.message}</Typography>
-                    )}
-                  </FormControl>
+                 
+<FormControl fullWidth sx={{ mb: 5 }} error={Boolean(errors.domain)}>
+  <InputLabel id="domain-label">Choose Domain</InputLabel>
+  <Controller
+    name="domain"
+    control={control}
+    render={({ field }) => (
+      <Select
+        labelId="domain-label"
+        label="Choose Domain(s)"
+        multiple
+        value={selectedDomain}
+        {...field}
+        onChange={(e) => {
+          const selectedDomains = e.target.value;
+          field.onChange(selectedDomains);
+          setSelectedDomain(selectedDomains); // Update selected domain state
+          setSelectedSubLevel([]); // Reset sublevels when domain changes
+          setValue('subLevel', []); // Clear sublevel values in form
+        }}
+      >
+        {[...new Set(gradeLevels.map((gl) => gl.domain))].map((domain) => (
+          <MenuItem key={domain} value={domain}>
+            {domain}
+          </MenuItem>
+        ))}
+      </Select>
+    )}
+  />
+  {errors.domain && (
+    <Typography color="error">{errors.domain.message}</Typography>
+  )}
+</FormControl>
 
-                  {/* Dropdown for Sublevel */}
-                  <FormControl fullWidth sx={{ mb: 5 }} error={Boolean(errors.subLevel)}>
-                    <InputLabel id="sublevel-label">Choose Sublevel</InputLabel>
-                    <Controller
-                      name="subLevel"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          labelId="sublevel-label"
-                          label="Choose Sublevel(s)"
-                          multiple
-                          {...field}
-                          value={field.value || selectedSubLevel}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            field.onChange(value);
-                            setSelectedSubLevel(value);
-                          }}
-                          disabled={!selectedDomain.length}
-                        >
-                          {selectedDomain
-                            .flatMap((domain) =>
-                              domains.find((domainObj) => domainObj.domain === domain)?.subLevels || []
-                            )
-                            .map((subLevel) => (
-                              <MenuItem key={subLevel} value={subLevel}>
-                                {subLevel}
-                              </MenuItem>
-                            ))}
-                        </Select>
-                      )}
-                    />
-                    {errors.subLevel && (
-                      <Typography color="error">{errors.subLevel.message}</Typography>
-                    )}
-                  </FormControl>
+{/* Dropdown for Sublevel */}
+<FormControl fullWidth sx={{ mb: 5 }} error={Boolean(errors.subLevel)}>
+  <InputLabel id="sublevel-label">Choose Sublevel</InputLabel>
+  <Controller
+    name="subLevel"
+    control={control}
+    render={({ field }) => (
+      <Select
+        labelId="sublevel-label"
+        label="Choose Sublevel(s)"
+        multiple
+        value={field.value || selectedSubLevel}
+        onChange={(e) => {
+          const selectedSubLevels = e.target.value;
+          field.onChange(selectedSubLevels);
+          setSelectedSubLevel(selectedSubLevels); // Update selected sublevel state
+        }}
+        disabled={!selectedDomain.length} // Disable sublevels until a domain is selected
+        {...field}
+      >
+        {gradeLevels
+          .filter((gl) => selectedDomain.includes(gl.domain))
+          .map((subLevel) => (
+            <MenuItem key={subLevel.grade_level_id} value={subLevel.sub_level}>
+              {subLevel.sub_level}
+            </MenuItem>
+          ))}
+      </Select>
+    )}
+  />
+  {errors.subLevel && (
+    <Typography color="error">{errors.subLevel.message}</Typography>
+  )}
+</FormControl>
+
 
                   <Snackbar
                     open={errorBar}

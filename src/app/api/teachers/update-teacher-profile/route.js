@@ -3,7 +3,8 @@ import {
     updateTeacherProfile, 
     updateTeacherLanguages, 
     updateTeacherGradeLevels, 
-    updateTeacherSubjects 
+    updateTeacherSubjects ,getTeacherByUserId,
+    updateTeacherProfileWithDetails,
 } from '../../../../lib/teacherService';
 
 import { verifyToken } from '../../../../lib/auth';
@@ -74,5 +75,32 @@ export async function PUT(req) {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
         });
+    }
+}
+export async function PATCH(req) {
+    try {
+        // Extract the token and validate
+        const token = req.headers.get('Authorization')?.split(' ')[1];
+        const userId = verifyToken(token); // Assume `verifyToken` extracts user ID from token
+
+        if (!userId) {
+            return new Response(JSON.stringify({ message: 'Unauthorized' }), { status: 401 });
+        }
+
+        // Extract the payload
+        const { hourly_rate, duration_per_session, grade_levels, subjects } = await req.json();
+
+        // Update teacher profile with the provided details
+        const response = await updateTeacherProfileWithDetails(userId.id, {
+            hourly_rate,
+            duration_per_session,
+            grade_levels,
+            subjects,
+        });
+
+        return new Response(JSON.stringify(response), { status: 200 });
+    } catch (error) {
+        console.error('Error:', error.message);
+        return new Response(JSON.stringify({ message: error.message }), { status: 500 });
     }
 }

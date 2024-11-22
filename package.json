@@ -25,7 +25,7 @@
     "@mui/icons-material": "^6.1.4",
     "@mui/lab": "^5.0.0-alpha.139",
     "@mui/material": "^5.16.7",
-    "@mui/x-date-pickers": "^7.22.2",
+    "@mui/x-date-pickers": "^7.22.3",
     "@reduxjs/toolkit": "^2.3.0",
     "autosuggest-highlight": "^3.3.4",
     "axios": "^1.4.0",

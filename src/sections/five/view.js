@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography';
 // components
 import { useSettingsContext } from 'src/components/settings';
 
+import ReviewForm from 'src/sections/five/review-form';
+
 // ----------------------------------------------------------------------
 
 export default function FiveView() {
@@ -15,18 +17,10 @@ export default function FiveView() {
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-      <Typography variant="h4"> Page Five </Typography>
-
-      <Box
-        sx={{
-          mt: 5,
-          width: 1,
-          height: 320,
-          borderRadius: 2,
-          bgcolor: (theme) => alpha(theme.palette.grey[500], 0.04),
-          border: (theme) => `dashed 1px ${theme.palette.divider}`,
-        }}
-      />
+      <Typography variant="h4" gutterBottom sx={{ mb: 2 }} >
+       Submit a Review </Typography>
+    
+      <ReviewForm onSubmitReview={(data) => console.log('Review Submitted:', data)} />
     </Container>
   );
 }

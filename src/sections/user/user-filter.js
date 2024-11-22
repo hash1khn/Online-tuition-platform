@@ -148,7 +148,7 @@ const UserFilter = ({ onFilterChange }) => {
         <Grid item xs={12} sm={6}>
           <Button
             variant="outlined"
-            color="secondary"
+            color="info"
             onClick={handleClear}
             fullWidth
             sx={{ height: '40px', textTransform: 'none' }}

@@ -49,8 +49,9 @@ export default function TeacherProfile({ id }) {
         }}
       >
         <ProfileCover
+          role={teacher.role || 'Teacher'}
           name={teacher.name || 'Anonymous'}
-          avatarUrl={teacher.profile_picture || '/default-avatar.png'}
+          profile_picture={teacher.profile_picture }
           coverUrl={teacher.coverURL || '/default-cover.jpg'}
           city_name={teacher.city_name || 'Unknown'}
           email={teacher.email || 'No email provided'}

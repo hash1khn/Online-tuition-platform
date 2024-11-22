@@ -35,77 +35,74 @@ const ICONS = {
 };
 
 export function useNavData(teacherId) {
-  const data = useMemo(
-    () => [
-      {
-        subheader: 'New Tutor',
-        items: [
-          {
-            title: 'Update Profile',
-            path: paths.dashboard.user.new,
-            icon: ICONS.user,
-            roles: ['teacher', 'student'],
-          },
-          {
-            title: 'Student profile',
-            path: paths.dashboard.group.seven,
-            icon: ICONS.user,
-            roles: ['student'],
-          },
-          {
-            title: 'Setup Profile',
-            path: paths.dashboard.user.complete,
-            icon: ICONS.dashboard,
-            roles: ['teacher'],
-          },
-          {
-            title: 'Terms & Conditions',
-            path: paths.dashboard.one,
-            icon: ICONS.order,
-            roles: ['teacher'],
-          },
-          {
-            title: 'Availability',
-            path: paths.dashboard.two,
-            icon: ICONS.ecommerce,
-            roles: ['teacher'],
-          },
-          {
-            title: 'Service',
-            path: paths.dashboard.three,
-            icon: ICONS.analytics,
-            roles: ['teacher'],
-          },
-         
-          {
-            title: 'Teachers Cards',
-            path: paths.dashboard.user.cards,
-            icon: ICONS.dashboard,
-            roles: ['student'],
-          },
-          {
-            title: 'Teachers profile',
-            path: paths.dashboard.user.id(teacherId), // Ensure teacherId is passed
-            icon: ICONS.user,
-            roles: ['student'],
-          },
-          {
-            title: 'Reviews',
-            path: paths.dashboard.group.five,
-            icon: ICONS.analytics,
-            roles: ['student'],
-          },
-          // {
-          //   title: 'Devs',
-          //   path: paths.dashboard.group.six,
-          //   icon: ICONS.ecommerce,
-          //   roles: ['teacher', 'student'],
-          // },
-        ],
-      },
-    ],
-    [teacherId] // Dependency array includes teacherId to re-render when it changes
-  );
+  // Memoize the data, passing an empty array as dependencies
+  const data = useMemo(() => [
+    {
+      subheader: 'New Tutor',
+      items: [
+        {
+          title: 'Update Profile',
+          path: paths.dashboard.user.new,
+          icon: ICONS.user,
+          roles: ['teacher', 'student'],
+        },
+        {
+          title: 'Student profile',
+          path: paths.dashboard.group.seven,
+          icon: ICONS.user,
+          roles: ['student'],
+        },
+        {
+          title: 'Setup Profile',
+          path: paths.dashboard.user.complete,
+          icon: ICONS.dashboard,
+          roles: ['teacher'],
+        },
+        {
+          title: 'Terms & Conditions',
+          path: paths.dashboard.one,
+          icon: ICONS.order,
+          roles: ['teacher'],
+        },
+        {
+          title: 'Availability',
+          path: paths.dashboard.two,
+          icon: ICONS.ecommerce,
+          roles: ['teacher'],
+        },
+        {
+          title: 'Service',
+          path: paths.dashboard.three,
+          icon: ICONS.analytics,
+          roles: ['teacher'],
+        },
+        {
+          title: 'Teachers Cards',
+          path: paths.dashboard.user.cards,
+          icon: ICONS.dashboard,
+          roles: ['student'],
+        },
+        // {
+        //   title: 'Teachers profile',
+        //   path: paths.dashboard.user.id(teacherId), // Ensure teacherId is passed
+        //   icon: ICONS.user,
+        //   roles: ['student'],
+        // },
+        {
+          title: 'Reviews',
+          path: paths.dashboard.group.five,
+          icon: ICONS.analytics,
+          roles: ['student'],
+        },
+        // {
+        //   title: 'Devs',
+        //   path: paths.dashboard.group.six,
+        //   icon: ICONS.ecommerce,
+        //   roles: ['teacher', 'student'],
+        // },
+      ],
+    },
+  ], []); // Empty dependency array to memoize the value
 
   return data;
 }
