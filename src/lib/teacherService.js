@@ -170,10 +170,11 @@ export async function filterTeachers(filters) {
         SELECT tgl.teacher_id
         FROM teacher_grade_levels tgl
         JOIN grade_levels gl ON tgl.grade_level_id = gl.grade_level_id
-        WHERE gl.domain = $${index++}
+        WHERE gl.domain = $${index}
       )`
     );
     values.push(grade);
+    index += 1; // Increment index
   }
 
   // Filter by subjects
@@ -183,10 +184,11 @@ export async function filterTeachers(filters) {
         SELECT ts.teacher_id
         FROM teacher_subjects ts
         JOIN subjects s ON ts.subject_id = s.subject_id
-        WHERE s.name = $${index++}
+        WHERE s.name = $${index}
       )`
     );
     values.push(subjects);
+    index += 1; // Increment index
   }
 
   // Filter by languages
@@ -196,28 +198,31 @@ export async function filterTeachers(filters) {
         SELECT tl.teacher_id
         FROM teacher_languages tl
         JOIN languages l ON tl.language_id = l.language_id
-        WHERE l.name = $${index++}
+        WHERE l.name = $${index}
       )`
     );
     values.push(languages);
+    index += 1; // Increment index
   }
 
   // Filter by price
   if (price) {
     const priceRange = price.split('-').map(Number); // Assuming `price` is a string like "500-1000"
     if (priceRange.length === 2) {
-      conditions.push(`t.hourly_rate BETWEEN $${index++} AND $${index++}`);
+      conditions.push(`t.hourly_rate BETWEEN $${index} AND $${index + 1}`);
       values.push(priceRange[0], priceRange[1]);
+      index += 2; // Increment index by 2
     }
   }
 
   // Filter by keyword in teacher's name, bio, or area
   if (keyword) {
     conditions.push(
-      `(u.name ILIKE $${index++} OR t.bio ILIKE $${index++} OR u.area ILIKE $${index++})`
+      `(u.name ILIKE $${index} OR t.bio ILIKE $${index + 1} OR u.area ILIKE $${index + 2})`
     );
     const keywordFilter = `%${keyword}%`;
     values.push(keywordFilter, keywordFilter, keywordFilter);
+    index += 3; // Increment index by 3
   }
 
   // Combine all conditions
@@ -261,6 +266,7 @@ export async function filterTeachers(filters) {
   const result = await query(text, values);
   return result.rows;
 }
+
 
 
 // get by id
