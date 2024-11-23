@@ -24,9 +24,9 @@ import RHFTextField from 'src/components/hook-form/rhf-text-field'; // Ensure th
 const BookSessionDialog = ({ open, onClose }) => {
   // Validation schema
   const schema = Yup.object().shape({
-    student_id: Yup.string().required('Student ID is required'),
-    teacher_id: Yup.string().required('Teacher ID is required'),
-    subject_id: Yup.string().required('Subject ID is required'),
+    // student_id: Yup.string().required('Student ID is required'),
+    // teacher_id: Yup.string().required('Teacher ID is required'),
+    // subject_id: Yup.string().required('Subject ID is required'),
     start_date: Yup.date().required('Start Date is required'),
     end_date: Yup.date().required('End Date is required'),
     mode: Yup.string().required('Mode is required'),
@@ -37,9 +37,9 @@ const BookSessionDialog = ({ open, onClose }) => {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      student_id: '',
-      teacher_id: '',
-      subject_id: '',
+    //   student_id: '',
+    //   teacher_id: '',
+    //   subject_id: '',
       start_date: '',
       end_date: '',
       mode: '',
@@ -68,7 +68,7 @@ const BookSessionDialog = ({ open, onClose }) => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box sx={{ display: 'grid', gap: 3 }}>
               {/* Contract Details Card */}
-              <Card sx={{ p: 3 }}>
+              {/* <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   Contract Details
                 </Typography>
@@ -98,7 +98,7 @@ const BookSessionDialog = ({ open, onClose }) => {
                     />
                   </Grid>
                 </Grid>
-              </Card>
+              </Card> */}
 
               {/* Session Details Card */}
               <Card sx={{ p: 3 }}>

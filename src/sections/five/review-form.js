@@ -16,12 +16,12 @@ export default function ReviewForm({ onSubmitReview, studentId }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const ReviewSchema = Yup.object().shape({
-    studentId: Yup.string()
-      .required('Student ID is required'),
-    contractId: Yup.string()
-      .required('Contract ID is required'),
-    teacherId: Yup.string()
-      .required('Teacher ID is required'),
+    // studentId: Yup.string()
+    //   .required('Student ID is required'),
+    // contractId: Yup.string()
+    //   .required('Contract ID is required'),
+    // teacherId: Yup.string()
+    //   .required('Teacher ID is required'),
     rating: Yup.number()
       .min(1, 'Minimum rating is 1')
       .max(5, 'Maximum rating is 5')
@@ -32,9 +32,9 @@ export default function ReviewForm({ onSubmitReview, studentId }) {
   const methods = useForm({
     resolver: yupResolver(ReviewSchema),
     defaultValues: {
-      studentId: '',
-      contractId: '',
-      teacherId: '',
+      // studentId: '',
+      // contractId: '',
+      // teacherId: '',
       rating: 0,
       reviewText: '',
     },
@@ -60,7 +60,7 @@ export default function ReviewForm({ onSubmitReview, studentId }) {
     <form onSubmit={handleSubmit(handleReviewSubmit)}>
 
       {/* Student and Contract Information */}
-      <Card sx={{ p: 3, mb: 3 }}>
+      {/* <Card sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Student and Contract Info
         </Typography>
@@ -100,7 +100,7 @@ export default function ReviewForm({ onSubmitReview, studentId }) {
             />
           </Grid>
         </Grid>
-      </Card>
+      </Card> */}
 
       {/* Review Details */}
       <Card sx={{ p: 3, mb: 3 }}>

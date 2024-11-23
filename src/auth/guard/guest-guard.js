@@ -4,7 +4,7 @@ import { useCallback, useEffect } from 'react';
 import { paths } from 'src/routes/paths';
 import { useRouter, useSearchParams } from 'src/routes/hooks';
 //
-import { useAuthContext } from '../hooks';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
