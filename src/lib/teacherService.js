@@ -411,12 +411,19 @@ export const getTeacherByUserId = async (userId) => {
   const text = `
     SELECT 
       t.*, 
-      array_agg(DISTINCT lang.name) AS languages
+      array_agg(DISTINCT lang.name) AS languages,       -- Fetch languages
+      array_agg(DISTINCT gl.domain) AS domains,         -- Fetch domains
+      array_agg(DISTINCT gl.sub_level) AS sub_levels,   -- Fetch sublevels
+      array_agg(DISTINCT s.name) AS subjects            -- Fetch subjects
     FROM teachers t
     LEFT JOIN teacher_languages tl ON t.teacher_id = tl.teacher_id
     LEFT JOIN languages lang ON tl.language_id = lang.language_id
+    LEFT JOIN teacher_grade_levels tgl ON t.teacher_id = tgl.teacher_id
+    LEFT JOIN grade_levels gl ON tgl.grade_level_id = gl.grade_level_id
+    LEFT JOIN teacher_subjects ts ON t.teacher_id = ts.teacher_id
+    LEFT JOIN subjects s ON ts.subject_id = s.subject_id
     WHERE t.user_id = $1
-    GROUP BY t.teacher_id
+    GROUP BY t.teacher_id;
   `;
   const values = [userId];
 
@@ -425,7 +432,7 @@ export const getTeacherByUserId = async (userId) => {
 
     // Check if a teacher exists for the provided user ID
     if (result.rows.length > 0) {
-      return result.rows[0]; // Return teacher details with languages
+      return result.rows[0]; // Return teacher details with languages, domains, sublevels, and subjects
     }
     return null; // Return null if no teacher found
   } catch (error) {
@@ -433,7 +440,6 @@ export const getTeacherByUserId = async (userId) => {
     throw new Error('Failed to fetch teacher details'); // Generic error message
   }
 };
-
 export async function clearTeacherAvailability(teacher_id) {
   const text = `
       DELETE FROM teacher_availability
