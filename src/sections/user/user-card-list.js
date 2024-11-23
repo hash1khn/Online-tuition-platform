@@ -15,7 +15,7 @@ export default function UserCardList() {
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(null); // Error state
 
-  const fetchFilteredUsers = async (filters) => {
+  const fetchFilteredUsers = async (filterParams) => {
     setLoading(true);
     setError(null);
 
@@ -25,7 +25,7 @@ export default function UserCardList() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(filters),
+        body: JSON.stringify(filterParams),
       });
 
       if (!response.ok) {
@@ -50,7 +50,7 @@ export default function UserCardList() {
   // Initial fetch on mount
   useEffect(() => {
     fetchFilteredUsers(filters);
-  }, []); // Empty dependency array to fetch on component mount
+  }, [filters]); // Add 'filters' as a dependency
 
   return (
     <Stack spacing={4}>
@@ -79,7 +79,3 @@ export default function UserCardList() {
     </Stack>
   );
 }
-
-UserCardList.propTypes = {
-  users: PropTypes.array,
-};
