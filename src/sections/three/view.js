@@ -24,7 +24,7 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import { saveService,fetchGradeLevels,fetchSubjects } from 'src/app/store/slices/serviceslice';
-import { fetchTeacherByUserId1 } from 'src/app/store/slices/teacherslice';
+import { fetchTeacherByUserId1,selectTeacher } from 'src/app/store/slices/teacherslice';
 
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 // Sample domains data
@@ -62,6 +62,8 @@ export default function Service(currentUser) {
   const [successBar, setSuccessBar] = useState(false);
   const dispatch = useDispatch();
   const { subjects, gradeLevels, loading } = useSelector((state) => state.service);
+  const teacherData = useSelector(selectTeacher);
+
 
   const service = useSelector((state) => state.service);
 
@@ -83,36 +85,54 @@ export default function Service(currentUser) {
     control,
     setValue,
     handleSubmit,
+    reset,
     formState: { errors }, 
   } = methods;
   useEffect(() => {
     dispatch(fetchSubjects());
     dispatch(fetchGradeLevels());
+    dispatch(fetchTeacherByUserId1());
+
   }, [dispatch]);
+  useEffect(() => {
+    if (teacherData) {
+      const { subjects,  domains, sub_levels,  hourly_rate, duration_per_session } = teacherData;
+      reset({
+        subject: subjects || [],
+        domain: domains || [],
+        subLevel: sub_levels || [],
+        duration: duration_per_session || '',
+        fees: hourly_rate || '',
+        discount: '', // Set this to a default value if needed
+      });
+      setSelectedDomain(domains||[]);
+      setSelectedSubLevel(sub_levels || []);
+    }
+  }, [teacherData, reset]);
 
-const onSubmit = (data) => {
-  try {
-    const gradeLevelIds = data.subLevel.map((subLevel) => 
-      gradeLevels.find((level) => level.sub_level === subLevel)?.grade_level_id
-    );
-    const subjectIds = data.subject.map((subject) => 
-      subjects.find((subj) => subj.name === subject)?.subject_id
-    );
-    const payload = {
-      hourly_rate: data.fees, 
-      duration_per_session: data.duration,
-      grade_levels: gradeLevelIds,
-      subjects: subjectIds,
-    };
-    console.log('Submitting Payload:', payload);
+  const onSubmit = (data) => {
+    try {
+      const gradeLevelIds = data.subLevel.map((subLevel) =>
+        gradeLevels.find((level) => level.sub_level === subLevel)?.grade_level_id
+      );
+      const subjectIds = data.subject.map((subject) =>
+        subjects.find((subj) => subj.name === subject)?.subject_id
+      );
+      const payload = {
+        hourly_rate: data.fees,
+        duration_per_session: data.duration,
+        grade_levels: gradeLevelIds,
+        subjects: subjectIds,
+      };
+      console.log('Submitting Payload:', payload);
 
-    dispatch(saveService(payload));
-    setSuccessBar(true);
-  } catch (error) {
-    console.error('Submission error:', error);
-    setErrorBar(true); // Display error message if submission fails
-  }
-};
+      dispatch(saveService(payload));
+      setSuccessBar(true);
+    } catch (error) {
+      console.error('Submission error:', error);
+      setErrorBar(true);
+    }
+  };
 
 
   // Handle domain selection
