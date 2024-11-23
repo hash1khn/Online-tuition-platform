@@ -61,7 +61,7 @@ export default function Service(currentUser) {
     const [isBackLoading, setIsBackLoading] = useState(false);
   const [successBar, setSuccessBar] = useState(false);
   const dispatch = useDispatch();
-  const { subjects, gradeLevels, loading } = useSelector((state) => state.service);
+  const { subjects:availableSubjects, gradeLevels, loading } = useSelector((state) => state.service);
   const teacherData = useSelector(selectTeacher);
 
 
@@ -96,9 +96,9 @@ export default function Service(currentUser) {
   }, [dispatch]);
   useEffect(() => {
     if (teacherData) {
-      const { subjects,  domains, sub_levels,  hourly_rate, duration_per_session } = teacherData;
+      const { subjects:teacherSubjects,  domains, sub_levels,  hourly_rate, duration_per_session } = teacherData;
       reset({
-        subject: subjects || [],
+        subject: teacherSubjects || [],
         domain: domains || [],
         subLevel: sub_levels || [],
         duration: duration_per_session || '',
@@ -116,7 +116,7 @@ export default function Service(currentUser) {
         gradeLevels.find((level) => level.sub_level === subLevel)?.grade_level_id
       );
       const subjectIds = data.subject.map((subject) =>
-        subjects.find((subj) => subj.name === subject)?.subject_id
+        availableSubjects.find((subj) => subj.name === subject)?.subject_id
       );
       const payload = {
         hourly_rate: data.fees,
@@ -172,7 +172,7 @@ export default function Service(currentUser) {
     control={control}
     render={({ field }) => (
       <Select labelId="subject-label" label="Choose Subject(s)" multiple {...field}>
-        {subjects.map((subject) => (
+        {availableSubjects.map((subject) => (
           <MenuItem key={subject.subject_id} value={subject.name}>
             {subject.name}
           </MenuItem>
