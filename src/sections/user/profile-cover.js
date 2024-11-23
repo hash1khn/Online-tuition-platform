@@ -1,17 +1,17 @@
 import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
-import ListItemText from '@mui/material/ListItemText';
 import { useTheme, alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-// theme
-import { bgGradient } from 'src/theme/css';
 // icons
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
 
 const convertToInternationalFormat = (phoneNumber) => {
   if (!phoneNumber.startsWith('+92') && phoneNumber.startsWith('0')) {
@@ -31,6 +31,7 @@ export default function ProfileCover({
   city_name,
   coverUrl,
   profile_picture,
+  age,
 }) {
   const theme = useTheme();
 
@@ -45,106 +46,195 @@ export default function ProfileCover({
   return (
     <Box
       sx={{
-        ...bgGradient({
-          color: alpha(theme.palette.primary.darker, 0.8),
-          imgUrl: coverUrl,
-        }),
-        height: 1,
-        color: 'common.white',
+        p: 5,
+        width: '100%',
+        height: '100%',
+        bgcolor: 'background.paper',
+        borderRadius: 2,
+        boxShadow: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
       }}
     >
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        sx={{
-          left: { md: 24 },
-          bottom: { md: 20 },
-          zIndex: { md: 10 },
-          pt: { xs: 4, md: 2 },
-          position: { md: 'absolute' },
-        }}
-      >
-        <Avatar
-          src={profile_picture}
-          alt={name}
+      <Grid container spacing={3} sx={{ maxWidth: '900px', width: '100%', mt: 0.25 }}>
+        <Grid
+          item
+          xs={12}
+          md={8}
           sx={{
-            mx: 'auto',
-            width: { xs: 64, md: 128 },
-            height: { xs: 64, md: 128 },
-            border: `solid 2px ${theme.palette.common.white}`,
+            display: 'flex',
+            gap: 3,
+            alignItems: 'center',
           }}
-        />
+        >
+          {/* Profile Picture */}
+          <Avatar
+            src={profile_picture}
+            alt={name}
+            sx={{
+              width: 160,
+              height: 160,
+              border: '3px solid',
+              borderColor: theme.palette.primary.main,
+              ml: -9,
+            }}
+          />
+          {/* Profile Details */}
+          <Box>
+            {/* Name */}
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              {name} 
+            </Typography>
+            {/* Role */}
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: 'text.secondary',
+                mb: 2,
+              }}
+            >
+              {role || 'No Experience Added'}
+            </Typography>
+            {/* Email */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <MailOutlineIcon fontSize="medium" color="action" />
+              <Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: '0.95rem',
+                    fontWeight: 'normal',
+                    color: 'text.primary',
+                  }}
+                >
+                  email address
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: '1rem',
+                    color: 'text.secondary',
+                  }}
+                >
+                  {email || 'N/A'}
+                </Typography>
+              </Box>
+            </Box>
+            {/* Mobile Number */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                cursor: phone_number ? 'pointer' : 'default',
+              }}
+              onClick={handleWhatsAppClick}
+            >
+              <WhatsAppIcon fontSize="medium" color="action" />
+              <Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: '0.95rem',
+                    fontWeight: 'normal',
+                    color: 'text.primary',
+                  }}
+                >
+                  contact number
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: '0.95rem',
+                    color: 'text.secondary',
+                  }}
+                >
+                  {phone_number || 'N/A'}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
 
-        <ListItemText
+        <Grid
+          item
+          xs={12}
+          md={4}
           sx={{
-            mt: 2,
-            ml: { md: 3 },
-            textAlign: { xs: 'center', md: 'unset' },
-            color: theme.palette.mode === 'light' ? 'common.white' : 'text.primary',
+            textAlign: 'right',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            mt: 9,
           }}
-          primary={name}
-          secondary={
-            <>
-              {phone_number && (
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Box
-                    onClick={handleWhatsAppClick}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      cursor: 'pointer',
-                      opacity: 0.7,
-                      '&:hover': { opacity: 1 },
-                    }}
-                  >
-                    <WhatsAppIcon sx={{ mr: 0.5, color: 'common.white' }} />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        mt: 0.5,
-                        color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary',
-                      }}
-                    >
-                      {phone_number}
-                    </Typography>
-                  </Box>
-                </Stack>
-              )}
-              {email && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    opacity: 0.7,
-                    mt: 0.5,
-                    color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary',
-                  }}
-                >
-                  ✉️ {email}
-                </Typography>
-              )}
-              {city_name && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    opacity: 0.7,
-                    mt: 0.5,
-                    color: theme.palette.mode === 'light' ? 'common.white' : 'text.secondary',
-                  }}
-                >
-                  📍 {city_name}
-                </Typography>
-              )}
-            </>
-          }
-          primaryTypographyProps={{
-            typography: 'h4',
-          }}
-        />
-      </Stack>
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <LocationOnIcon fontSize="medium" color="action" />
+            <Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: '0.95rem',
+                  fontWeight: 'normal',
+                  color: 'text.primary',
+                }}
+              >
+                city
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: '0.95rem',
+                  color: 'text.secondary',
+                }}
+              >
+                {city_name || 'N/A'}
+              </Typography>
+            </Box>
+          </Box>
+          {/* Age */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2 }}>
+            <AccountBoxIcon fontSize="medium" color="action" /> {/* Mature icon */}
+            <Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: '0.95rem',
+                  fontWeight: 'normal',
+                  color: 'text.primary',
+                }}
+              >
+                age
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: '0.95rem',
+                  color: 'text.secondary',
+                }}
+              >
+                {age || 'N/A'}
+              </Typography>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+
       <Button
         variant="contained"
         sx={{
           position: 'absolute',
-          bottom: 25,
+          top: 25,
           right: 16,
           backgroundColor: theme.palette.primary.dark,
           color: 'common.white',
@@ -167,4 +257,5 @@ ProfileCover.propTypes = {
   city_name: PropTypes.string,
   coverUrl: PropTypes.string.isRequired,
   profile_picture: PropTypes.string.isRequired,
+  age: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
