@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, TextField, Button, MenuItem, Grid, useTheme } from '@mui/material';
 
@@ -11,7 +11,37 @@ const UserFilter = ({ onFilterChange }) => {
     price: '',
   });
 
+  const [languages, setLanguages] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [grades, setGrades] = useState([]);
+
   const theme = useTheme();
+
+  // Fetch filter options from the backend
+  useEffect(() => {
+    const fetchFilterOptions = async () => {
+      try {
+        // Fetch languages
+        const langResponse = await fetch('/api/languages');
+        if (!langResponse.ok) throw new Error('Failed to fetch languages');
+        setLanguages(await langResponse.json());
+
+        // Fetch subjects
+        const subjectResponse = await fetch('/api/subjects');
+        if (!subjectResponse.ok) throw new Error('Failed to fetch subjects');
+        setSubjects(await subjectResponse.json());
+
+        // Fetch grades (domain)
+        const gradeResponse = await fetch('/api/grade-levels');
+        if (!gradeResponse.ok) throw new Error('Failed to fetch grades');
+        setGrades(await gradeResponse.json());
+      } catch (error) {
+        console.error('Error fetching filter options:', error);
+      }
+    };
+
+    fetchFilterOptions();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,11 +87,11 @@ const UserFilter = ({ onFilterChange }) => {
             fullWidth
             sx={{ '& .MuiInputBase-root': { backgroundColor: theme.palette.background.default } }}
           >
-            <MenuItem value="English">English</MenuItem>
-            <MenuItem value="Urdu">Urdu</MenuItem>
-            <MenuItem value="Mandarin">Mandarin</MenuItem>
-            <MenuItem value="Spanish">Spanish</MenuItem>
-            <MenuItem value="French">French</MenuItem>
+            {languages.map((language) => (
+              <MenuItem key={language.language_id} value={language.name}>
+                {language.name}
+              </MenuItem>
+            ))}
           </TextField>
         </Grid>
 
@@ -77,9 +107,11 @@ const UserFilter = ({ onFilterChange }) => {
             fullWidth
             sx={{ '& .MuiInputBase-root': { backgroundColor: theme.palette.background.default } }}
           >
-            <MenuItem value="O levels">O levels</MenuItem>
-            <MenuItem value="A levels">A levels</MenuItem>
-            <MenuItem value="Intermediate">Intermediate</MenuItem>
+            {[...new Set(grades.map((grade) => grade.domain))].map((grade) => (
+              <MenuItem key={grade} value={grade}>
+                {grade}
+              </MenuItem>
+            ))}
           </TextField>
         </Grid>
 
@@ -95,13 +127,11 @@ const UserFilter = ({ onFilterChange }) => {
             fullWidth
             sx={{ '& .MuiInputBase-root': { backgroundColor: theme.palette.background.default } }}
           >
-            <MenuItem value="Math">Math</MenuItem>
-            <MenuItem value="Science">Science</MenuItem>
-            <MenuItem value="History">History</MenuItem>
-            <MenuItem value="English">English</MenuItem>
-            <MenuItem value="English Literature">English Literature</MenuItem>
-            <MenuItem value="Computer Science">Computer Science</MenuItem>
-            <MenuItem value="Art">Art</MenuItem>
+            {subjects.map((subject) => (
+              <MenuItem key={subject.subject_id} value={subject.name}>
+                {subject.name}
+              </MenuItem>
+            ))}
           </TextField>
         </Grid>
 

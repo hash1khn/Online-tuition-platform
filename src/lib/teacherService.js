@@ -156,6 +156,112 @@ export async function getAllTeachers() {
   const result = await query(text);
   return result.rows;
 }
+export async function filterTeachers(filters) {
+  const { grade, keyword, languages, price, subjects } = filters;
+
+  const conditions = [];
+  const values = [];
+  let index = 1;
+
+  // Filter by grade level domain
+  if (grade) {
+    conditions.push(
+      `t.teacher_id IN (
+        SELECT tgl.teacher_id
+        FROM teacher_grade_levels tgl
+        JOIN grade_levels gl ON tgl.grade_level_id = gl.grade_level_id
+        WHERE gl.domain = $${index++}
+      )`
+    );
+    values.push(grade);
+  }
+
+  // Filter by subjects
+  if (subjects) {
+    conditions.push(
+      `t.teacher_id IN (
+        SELECT ts.teacher_id
+        FROM teacher_subjects ts
+        JOIN subjects s ON ts.subject_id = s.subject_id
+        WHERE s.name = $${index++}
+      )`
+    );
+    values.push(subjects);
+  }
+
+  // Filter by languages
+  if (languages) {
+    conditions.push(
+      `t.teacher_id IN (
+        SELECT tl.teacher_id
+        FROM teacher_languages tl
+        JOIN languages l ON tl.language_id = l.language_id
+        WHERE l.name = $${index++}
+      )`
+    );
+    values.push(languages);
+  }
+
+  // Filter by price
+  if (price) {
+    const priceRange = price.split('-').map(Number); // Assuming `price` is a string like "500-1000"
+    if (priceRange.length === 2) {
+      conditions.push(`t.hourly_rate BETWEEN $${index++} AND $${index++}`);
+      values.push(priceRange[0], priceRange[1]);
+    }
+  }
+
+  // Filter by keyword in teacher's name, bio, or area
+  if (keyword) {
+    conditions.push(
+      `(u.name ILIKE $${index++} OR t.bio ILIKE $${index++} OR u.area ILIKE $${index++})`
+    );
+    const keywordFilter = `%${keyword}%`;
+    values.push(keywordFilter, keywordFilter, keywordFilter);
+  }
+
+  // Combine all conditions
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+  const text = `
+      SELECT 
+        t.teacher_id, 
+        u.name, 
+        u.email, 
+        u.phone_number, 
+        u.gender, 
+        u.dob, 
+        u.profile_picture, 
+        u.area, 
+        c.city_name, 
+        t.teaching_mode, 
+        t.bio, 
+        t.is_verified,
+        t.experience_years, 
+        t.education, 
+        t.rating, 
+        t.hourly_rate,
+        t.duration_per_session,
+        array_agg(DISTINCT lang.name) AS languages,
+        array_agg(DISTINCT gl.sub_level) AS grade_levels,
+        array_agg(DISTINCT s.name) AS subjects
+      FROM teachers t
+      JOIN users u ON t.user_id = u.user_id
+      LEFT JOIN cities c ON u.city_id = c.city_id
+      LEFT JOIN teacher_languages tl ON tl.teacher_id = t.teacher_id
+      LEFT JOIN languages lang ON tl.language_id = lang.language_id
+      LEFT JOIN teacher_grade_levels tgl ON tgl.teacher_id = t.teacher_id
+      LEFT JOIN grade_levels gl ON tgl.grade_level_id = gl.grade_level_id
+      LEFT JOIN teacher_subjects ts ON ts.teacher_id = t.teacher_id
+      LEFT JOIN subjects s ON ts.subject_id = s.subject_id
+      ${whereClause}
+      GROUP BY t.teacher_id, u.user_id, c.city_name;
+    `;
+
+  const result = await query(text, values);
+  return result.rows;
+}
+
 
 // get by id
 export async function getTeacherById(id) {
