@@ -14,7 +14,7 @@ export default function Page() {
   const { user } = useAuthContext();
   const role = user?.role;
 
-  return role === 'student' ? (
+  return role === 'teacher' ? (
     <UserCompleteView />// Render FiveView if role is 'student'
   ) : (
     <View403 /> // Render View403 (error page) if role is not 'student'

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import {
   Box,
   Container,
@@ -15,6 +15,7 @@ import {
   Button,
   Snackbar,
   Alert,
+  Divider,
 } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useForm, Controller } from 'react-hook-form';
@@ -23,21 +24,16 @@ import * as Yup from 'yup';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { useDispatch, useSelector } from 'react-redux';
-<<<<<<< HEAD
-import { saveService } from 'src/app/store/slices/serviceslice';
-
-=======
 import { saveService,fetchGradeLevels,fetchSubjects } from 'src/app/store/slices/serviceslice';
 import { fetchTeacherByUserId1,selectTeacher } from 'src/app/store/slices/teacherslice';
->>>>>>> 5d83b68c87d1d2a058797781bdf88a09f19a3011
 
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 // Sample domains data
-const domains = [
-  { domain: 'O-level', subLevels: ['O1', 'O2', 'O3'] },
-  { domain: 'A-level', subLevels: ['AS', 'A2'] },
-  { domain: 'Intermediate', subLevels: ['Part 1', 'Part 2'] },
-];
+// const domains = [
+//   { domain: 'O-level', subLevels: ['O1', 'O2', 'O3'] },
+//   { domain: 'A-level', subLevels: ['AS', 'A2'] },
+//   { domain: 'Intermediate', subLevels: ['Part 1', 'Part 2'] },
+// ];
 
 
 
@@ -66,13 +62,10 @@ export default function Service(currentUser) {
     const [isBackLoading, setIsBackLoading] = useState(false);
   const [successBar, setSuccessBar] = useState(false);
   const dispatch = useDispatch();
-<<<<<<< HEAD
-=======
   const { subjects:availableSubjects, gradeLevels, loading } = useSelector((state) => state.service);
   const teacherData = useSelector(selectTeacher);
 
 
->>>>>>> 5d83b68c87d1d2a058797781bdf88a09f19a3011
   const service = useSelector((state) => state.service);
 
   // React Hook Form setup
@@ -96,19 +89,6 @@ export default function Service(currentUser) {
     reset,
     formState: { errors }, 
   } = methods;
-<<<<<<< HEAD
-
-const onSubmit = (data) => {
-  try {
-    console.log('Form values:', data);
-    dispatch(saveService(data));
-    setSuccessBar(true);
-  } catch (error) {
-    console.error('Submission error:', error);
-    setErrorBar(true); // Display error message if submission fails
-  }
-};
-=======
   useEffect(() => {
     dispatch(fetchSubjects());
     dispatch(fetchGradeLevels());
@@ -154,7 +134,6 @@ const onSubmit = (data) => {
       setErrorBar(true);
     }
   };
->>>>>>> 5d83b68c87d1d2a058797781bdf88a09f19a3011
 
 
   // Handle domain selection
@@ -182,10 +161,11 @@ const onSubmit = (data) => {
             <Grid item xs={12}>
               <Card>
                 <CardContent>
-                  <Typography sx={{ mb: 5 }} variant="h6" gutterBottom>
+                  <Typography variant="h6" gutterBottom>
                     Choose Subject, Domain, and Grade Level
                   </Typography>
 
+                  <Divider sx={{ mb: 5 }} />
                   {/* Dropdown for Subject */}
                   <FormControl fullWidth sx={{ mb: 5 }} error={Boolean(errors.subject)}>
   <InputLabel id="subject-label">Choose Subject(s)</InputLabel>
@@ -194,15 +174,9 @@ const onSubmit = (data) => {
     control={control}
     render={({ field }) => (
       <Select labelId="subject-label" label="Choose Subject(s)" multiple {...field}>
-<<<<<<< HEAD
-        {subjects.map((subject) => (
-          <MenuItem key={subject} value={subject}>
-            {subject}
-=======
         {availableSubjects.map((subject) => (
           <MenuItem key={subject.subject_id} value={subject.name}>
             {subject.name}
->>>>>>> 5d83b68c87d1d2a058797781bdf88a09f19a3011
           </MenuItem>
         ))}
       </Select>
@@ -214,72 +188,75 @@ const onSubmit = (data) => {
 
 
                   {/* Dropdown for Domain */}
-                  <FormControl fullWidth sx={{ mb: 5 }} error={Boolean(errors.domain)}>
-                    <InputLabel id="domain-label">Choose Domain</InputLabel>
-                    <Controller
-                      name="domain"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          labelId="domain-label"
-                          label="Choose Domain(s)"
-                          multiple
-                          value={selectedDomain}
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleDomainSelect(e);
-                          }}
-                        >
-                          {domains.map((domainObj) => (
-                            <MenuItem key={domainObj.domain} value={domainObj.domain}>
-                              {domainObj.domain}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      )}
-                    />
-                    {errors.domain && (
-                      <Typography color="error">{errors.domain.message}</Typography>
-                    )}
-                  </FormControl>
+                 
+<FormControl fullWidth sx={{ mb: 5 }} error={Boolean(errors.domain)}>
+  <InputLabel id="domain-label">Choose Domain</InputLabel>
+  <Controller
+    name="domain"
+    control={control}
+    render={({ field }) => (
+      <Select
+        labelId="domain-label"
+        label="Choose Domain(s)"
+        multiple
+        value={selectedDomain}
+        {...field}
+        onChange={(e) => {
+          const selectedDomains = e.target.value;
+          field.onChange(selectedDomains);
+          setSelectedDomain(selectedDomains); // Update selected domain state
+          setSelectedSubLevel([]); // Reset sublevels when domain changes
+          setValue('subLevel', []); // Clear sublevel values in form
+        }}
+      >
+        {[...new Set(gradeLevels.map((gl) => gl.domain))].map((domain) => (
+          <MenuItem key={domain} value={domain}>
+            {domain}
+          </MenuItem>
+        ))}
+      </Select>
+    )}
+  />
+  {errors.domain && (
+    <Typography color="error">{errors.domain.message}</Typography>
+  )}
+</FormControl>
 
-                  {/* Dropdown for Sublevel */}
-                  <FormControl fullWidth sx={{ mb: 5 }} error={Boolean(errors.subLevel)}>
-                    <InputLabel id="sublevel-label">Choose Sublevel</InputLabel>
-                    <Controller
-                      name="subLevel"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          labelId="sublevel-label"
-                          label="Choose Sublevel(s)"
-                          multiple
-                          {...field}
-                          value={field.value || selectedSubLevel}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            field.onChange(value);
-                            setSelectedSubLevel(value);
-                          }}
-                          disabled={!selectedDomain.length}
-                        >
-                          {selectedDomain
-                            .flatMap((domain) =>
-                              domains.find((domainObj) => domainObj.domain === domain)?.subLevels || []
-                            )
-                            .map((subLevel) => (
-                              <MenuItem key={subLevel} value={subLevel}>
-                                {subLevel}
-                              </MenuItem>
-                            ))}
-                        </Select>
-                      )}
-                    />
-                    {errors.subLevel && (
-                      <Typography color="error">{errors.subLevel.message}</Typography>
-                    )}
-                  </FormControl>
+{/* Dropdown for Sublevel */}
+<FormControl fullWidth sx={{ mb: 5 }} error={Boolean(errors.subLevel)}>
+  <InputLabel id="sublevel-label">Choose Sublevel</InputLabel>
+  <Controller
+    name="subLevel"
+    control={control}
+    render={({ field }) => (
+      <Select
+        labelId="sublevel-label"
+        label="Choose Sublevel(s)"
+        multiple
+        value={field.value || selectedSubLevel}
+        onChange={(e) => {
+          const selectedSubLevels = e.target.value;
+          field.onChange(selectedSubLevels);
+          setSelectedSubLevel(selectedSubLevels); // Update selected sublevel state
+        }}
+        disabled={!selectedDomain.length} // Disable sublevels until a domain is selected
+        {...field}
+      >
+        {gradeLevels
+          .filter((gl) => selectedDomain.includes(gl.domain))
+          .map((subLevel) => (
+            <MenuItem key={subLevel.grade_level_id} value={subLevel.sub_level}>
+              {subLevel.sub_level}
+            </MenuItem>
+          ))}
+      </Select>
+    )}
+  />
+  {errors.subLevel && (
+    <Typography color="error">{errors.subLevel.message}</Typography>
+  )}
+</FormControl>
+
 
                   <Snackbar
                     open={errorBar}
@@ -295,9 +272,12 @@ const onSubmit = (data) => {
               </Card>
               <Card sx={{ mt: 5 }}>
                 <CardContent>
-                  <Typography variant="h6" sx={{ mb: 5 }}>
+                  <Typography variant="h6" gutterBottom>
                     Duration
                   </Typography>
+
+                  <Divider sx={{ mb: 5 }} />
+
                   <FormControl fullWidth sx={{ mb: 2 }} error={Boolean(errors.duration)}>
                     <InputLabel id="duration-label">Select Duration</InputLabel>
                     <Controller
@@ -320,9 +300,12 @@ const onSubmit = (data) => {
               </Card>
               <Card sx={{ mt: 5 }}>
                 <CardContent>
-                  <Typography variant="h6" sx={{ mb: 5 }}>
+                  <Typography variant="h6" gutterBottom>
                     Fees and Discounts
                   </Typography>
+
+                  <Divider sx={{ mb: 5 }} />
+
                   <Box
                     sx={{
                       display: 'flex', // Set display to flex

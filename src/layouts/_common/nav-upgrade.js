@@ -1,9 +1,15 @@
 // @mui
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Divider from '@mui/material/Divider';
 // hooks
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 import { useAuthContext } from 'src/auth/hooks';
@@ -18,7 +24,11 @@ import Label from 'src/components/label';
 
 export default function NavUpgrade() {
   const{user}=useAuthContext();
-  console.log(user)
+  const [open, setOpen] = useState(false);
+  const referralLink = 'https://tutorlypk.vercel.app/auth/jwt/login/?returnTo=%2Fdashboard%2Fuser%2Fnew%2F';
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return (
     <Stack
@@ -57,11 +67,92 @@ export default function NavUpgrade() {
           </Typography>
         </Stack>
 
-        {/* Button updated to 'Refer a friend' */}
-        <Button variant="contained" href={paths.referAFriend} target="_blank" rel="noopener">
+        <Button variant="contained" onClick={handleOpen}>
           Refer a friend
         </Button>
       </Stack>
-    </Stack>
+
+     <Dialog
+     open={open}
+     onClose={handleClose}
+     maxWidth="md"
+     fullWidth
+     sx={{
+       '& .MuiDialog-paper': {
+         padding: 3, 
+       },
+     }}
+   >
+     <DialogTitle>Refer a Friend</DialogTitle>
+     <DialogContent>
+       <Typography variant="body2" sx={{ mb: 2 }}>
+         Invite your friends to TutorlyPK and learn together! Share the referral link below.
+       </Typography>
+
+       <Typography
+         variant="body1"
+         component="a"
+         href={referralLink}
+         target="_blank"
+         rel="noopener"
+         sx={{
+           color: 'primary.main',
+           textDecoration: 'none',
+           wordBreak: 'break-all',
+           '&:hover': {
+             textDecoration: 'underline',
+           },
+         }}
+       >
+         {referralLink}
+       </Typography>
+
+       <Divider sx={{ my: 3 }} />
+
+       {/* Sharing Options */}
+       <Typography variant="body2" sx={{ mb: 1 }}>
+         Share via:
+       </Typography>
+       <Stack direction="row" spacing={2} justifyContent="center">
+         <Button
+           size="small"
+           variant="outlined"
+           href={`mailto:?subject=Join TutorlyPK&body=Sign up using my referral link: ${referralLink}`}
+         >
+           Email
+         </Button>
+         <Button
+           size="small"
+           variant="outlined"
+           href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`}
+           target="_blank"
+         >
+           Facebook
+         </Button>
+         <Button
+           size="small"
+           variant="outlined"
+           href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(referralLink)}&text=Check out TutorlyPK!`}
+           target="_blank"
+         >
+           Twitter
+         </Button>
+         <Button
+           size="small"
+           variant="outlined"
+           href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(referralLink)}`}
+           target="_blank"
+         >
+           LinkedIn
+         </Button>
+       </Stack>
+     </DialogContent>
+     <DialogActions>
+       <Button onClick={handleClose} color="info">
+         Close
+       </Button>
+     </DialogActions>
+   </Dialog>
+ </Stack>
   );
 }

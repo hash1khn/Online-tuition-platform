@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, TextField, Button, MenuItem, Grid, useTheme } from '@mui/material';
+import { Box, TextField, Button, MenuItem, Grid, useTheme, Typography, Slider } from '@mui/material';
 
 const UserFilter = ({ onFilterChange }) => {
   const [filters, setFilters] = useState({
@@ -8,7 +8,7 @@ const UserFilter = ({ onFilterChange }) => {
     grade: '',
     subjects: '',
     keyword: '',
-    price: '',
+    price: [0, 1000],
   });
 
   const [languages, setLanguages] = useState([]);
@@ -48,21 +48,27 @@ const UserFilter = ({ onFilterChange }) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSearch = () => {
-    onFilterChange(filters);
+  const handlePriceChange = (event, newValue) => {
+    setFilters((prev) => ({ ...prev, price: newValue }));
   };
 
+  const handleSearch = () => {
+    const formattedFilters = {
+      ...filters,
+      price: filters.price.join('-'), // Convert the price array [0, 1000] to the string "0-1000"
+    };
+    onFilterChange(formattedFilters);
+  };
   const handleClear = () => {
     setFilters({
       languages: '',
       grade: '',
       subjects: '',
       keyword: '',
-      price: '',
+      price: [0, 1000],
     });
     onFilterChange({});
   };
-
   return (
     <Box
       sx={{
@@ -71,11 +77,12 @@ const UserFilter = ({ onFilterChange }) => {
         padding: 2,
         borderRadius: 2,
         boxShadow: theme.shadows[2],
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: 2,
       }}
     >
-      <Grid container spacing={2}>
-        {/* First Row */}
-        <Grid item xs={12} sm={4}>
           <TextField
             select
             label="Select Language"
@@ -85,7 +92,10 @@ const UserFilter = ({ onFilterChange }) => {
             variant="outlined"
             size="small"
             fullWidth
-            sx={{ '& .MuiInputBase-root': { backgroundColor: theme.palette.background.default } }}
+            sx={{ flex: 1, minWidth: '170px',
+              height: '40px',mt:2,
+              '& .MuiInputBase-root': { height: '40px', padding: '0 10px' },
+             }}
           >
             {languages.map((language) => (
               <MenuItem key={language.language_id} value={language.name}>
@@ -93,9 +103,7 @@ const UserFilter = ({ onFilterChange }) => {
               </MenuItem>
             ))}
           </TextField>
-        </Grid>
 
-        <Grid item xs={12} sm={4}>
           <TextField
             select
             label="Select Grade"
@@ -105,7 +113,10 @@ const UserFilter = ({ onFilterChange }) => {
             variant="outlined"
             size="small"
             fullWidth
-            sx={{ '& .MuiInputBase-root': { backgroundColor: theme.palette.background.default } }}
+            sx={{ flex: 1, minWidth: '170px',mt:2,
+              height: '40px',
+              '& .MuiInputBase-root': { height: '40px', padding: '0 10px' },
+             }}
           >
             {[...new Set(grades.map((grade) => grade.domain))].map((grade) => (
               <MenuItem key={grade} value={grade}>
@@ -113,9 +124,7 @@ const UserFilter = ({ onFilterChange }) => {
               </MenuItem>
             ))}
           </TextField>
-        </Grid>
 
-        <Grid item xs={12} sm={4}>
           <TextField
             select
             label="Select Subject(s)"
@@ -125,7 +134,10 @@ const UserFilter = ({ onFilterChange }) => {
             variant="outlined"
             size="small"
             fullWidth
-            sx={{ '& .MuiInputBase-root': { backgroundColor: theme.palette.background.default } }}
+            sx={{ flex: 1, minWidth: '170px',mt:2,
+              height: '40px',
+              '& .MuiInputBase-root': { height: '40px', padding: '0 10px' },
+             }}
           >
             {subjects.map((subject) => (
               <MenuItem key={subject.subject_id} value={subject.name}>
@@ -133,23 +145,7 @@ const UserFilter = ({ onFilterChange }) => {
               </MenuItem>
             ))}
           </TextField>
-        </Grid>
 
-        {/* Second Row */}
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Price Per Session"
-            name="price"
-            value={filters.price}
-            onChange={handleChange}
-            variant="outlined"
-            size="small"
-            fullWidth
-            sx={{ '& .MuiInputBase-root': { backgroundColor: theme.palette.background.default } }}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
           <TextField
             label="Enter Keyword (optional)"
             name="keyword"
@@ -158,35 +154,53 @@ const UserFilter = ({ onFilterChange }) => {
             variant="outlined"
             size="small"
             fullWidth
-            sx={{ '& .MuiInputBase-root': { backgroundColor: theme.palette.background.default } }}
+            sx={{ flex: 1, minWidth: '300px',mt:2,
+              height: '40px',
+              '& .MuiInputBase-root': { height: '40px', padding: '0 10px' },
+             }}
           />
-        </Grid>
 
-        {/* Buttons */}
-        <Grid item xs={12} sm={6}>
           <Button
             variant="contained"
             color="primary"
             onClick={handleSearch}
-            fullWidth
-            sx={{ height: '40px', textTransform: 'none' }}
+            sx={{ flex: 1, minWidth: '100px',mt:2, height: '40px', textTransform: 'none' }}
           >
             Search
           </Button>
-        </Grid>
 
-        <Grid item xs={12} sm={6}>
           <Button
             variant="outlined"
             color="info"
             onClick={handleClear}
-            fullWidth
-            sx={{ height: '40px', textTransform: 'none' }}
+            sx={{ flex: 1, minWidth: '100px',mt:2, height: '40px', textTransform: 'none' }}
           >
             Clear
           </Button>
-        </Grid>
-      </Grid>
+
+       {/* Price Slider */}
+      <Box sx={{ flex: '1 1 100%', display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 1 }}>
+        <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
+          Price Per Session
+        </Typography>
+        <Slider
+          value={filters.price}
+          onChange={handlePriceChange}
+          valueLabelDisplay="auto"
+          min={0}
+          max={1000}
+          sx={{
+            width: '100%',
+            maxWidth: '600px',
+            color: theme.palette.primary.main,
+            '& .MuiSlider-thumb': { borderRadius: '50%' },
+          }}
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '600px' }}>
+          <Typography variant="body2">$0.00</Typography>
+          <Typography variant="body2">$1000.00</Typography>
+        </Box>
+      </Box>
     </Box>
   );
 };
