@@ -12,6 +12,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
+import { LoadingScreen } from 'src/components/loading-screen';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFUploadAvatar, RHFSelect } from 'src/components/hook-form';
 // Import the fetchCities and selectCities
@@ -31,6 +32,7 @@ export default function UserNewEditForm({ userId }) {
   const currentUser = useSelector((state) => state.user.currentUser);
   const cities = useSelector(selectCities); // Get cities from the Redux store
   const [selectedCity, setSelectedCity] = useState('');
+  const [isLoading, setIsLoading] = useState(true); 
   const [selectedGender, setSelectedGender] = useState('');
   const [isNextLoading, setIsNextLoading] = useState(false);
 
@@ -66,8 +68,10 @@ export default function UserNewEditForm({ userId }) {
   } = methods;
 
   useEffect(() => {
+    setIsLoading(true);
     dispatch(getUserById());
     dispatch(fetchCities());
+    setIsLoading(false);
   }, [dispatch]);
 
   useEffect(() => {
@@ -153,6 +157,18 @@ const handleDrop = useCallback(
   [setValue, enqueueSnackbar]
 );
 
+if (isLoading) {
+  return (
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      height="100vh"
+    >
+      <LoadingScreen />
+    </Box>
+  );
+}
   const handleNextClick = () => {
     const formValues = methods.getValues();
   

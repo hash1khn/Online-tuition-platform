@@ -17,6 +17,7 @@ import BookIcon from '@mui/icons-material/Book';
 import LanguageIcon from '@mui/icons-material/Language';
 import LayersIcon from '@mui/icons-material/Layers';
 import ProfilePostItem from './profile-post-item';
+import UserCardListBySubject from './user-card-profile-home';
 // ----------------------------------------------------------------------
 
 export default function ProfileHome({ info, posts }) {
@@ -178,16 +179,36 @@ export default function ProfileHome({ info, posts }) {
         {renderBio}
       </Grid>
 
-      {/* <Grid xs={12}>
-        <Card sx={{ p: 3, boxShadow: 2, borderRadius: '16px' }}>
-          <CardHeader title="Posts" /> */}
-          {/* <Stack spacing={3}>
-            {posts.map((post) => (
-              <ProfilePostItem key={post.id} post={post} />
-            ))}
-          </Stack> */}
-        {/* </Card>
-      </Grid> */}
+      <Grid xs={12}>
+
+
+<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 }}>
+  <Typography
+    variant="h3"  // Slightly larger heading for more prominence
+    sx={{
+      fontWeight: '600',  // Medium boldness for a professional look
+      color: 'text.primary',
+      mt : 5,
+      mb : 5,
+
+      textAlign: 'center',
+      letterSpacing: 1.5,  // Adds space between letters for better readability
+        // Margin below for spacing
+      textTransform: 'uppercase',  // Optional: adds emphasis by capitalizing the title
+      borderBottom: '2px solid',  // Optional: underline effect for a professional look
+      width: 'fit-content',  // Ensures the border wraps the title text
+      pb: 1,  // Padding below the text to give space between text and underline
+    }}
+  >
+    Teacher Teaching Similar Subjects
+  </Typography>
+</Box>
+
+
+  <Stack spacing={3}>
+    <UserCardListBySubject />
+  </Stack>
+</Grid>
     </Grid>
   );
 }

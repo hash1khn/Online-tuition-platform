@@ -11,13 +11,13 @@ import UserFilter from './user-filter';
 
 // ----------------------------------------------------------------------
 
-export default function UserCardList() {
+export default function UserCardListBySubject() {
   const [users, setUsers] = useState([]); // State for user data
-  const [filters, setFilters] = useState({}); // State for filters
+  const [filters, setFilters] = useState({ subject: '' }); // State for subject filter
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(null); // Error state
 
-  const fetchFilteredUsers = async (filterParams) => {
+  const fetchFilteredUsersBySubject = async (filterParams) => {
     setLoading(true);
     setError(null);
 
@@ -44,19 +44,15 @@ export default function UserCardList() {
     }
   };
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    fetchFilteredUsers(newFilters); // Fetch users based on new filters
-  };
 
   // Initial fetch on mount
   useEffect(() => {
-    fetchFilteredUsers(filters);
+    fetchFilteredUsersBySubject(filters);
   }, [filters]); // Add 'filters' as a dependency
 
   return (
     <Stack spacing={4}>
-      <UserFilter onFilterChange={handleFilterChange} />
+    
 
       {loading && <div><LoadingScreen /></div>}
       {error && <div>{error}</div>}

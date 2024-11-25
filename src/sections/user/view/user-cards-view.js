@@ -4,7 +4,7 @@
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import React from 'react';
-
+import Box from '@mui/material/Box';
 // routes
 import { paths } from 'src/routes/paths';
 // components
@@ -16,6 +16,7 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 
 
 // Redux hooks
+import { LoadingScreen } from 'src/components/loading-screen';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTeachers } from '../../../app/store/slices/teacherslice';
 import UserCardList from '../user-card-list';
@@ -34,7 +35,17 @@ export default function UserCardsView() {
     dispatch(fetchTeachers());
   }, [dispatch]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Box
+  sx={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+  }}
+>
+  <LoadingScreen />
+</Box>;
+ 
   if (error) return <div>Error: {error}</div>;
 
   return (

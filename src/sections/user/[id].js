@@ -1,7 +1,9 @@
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
+import { LoadingScreen } from 'src/components/loading-screen';
 import { Card, CircularProgress, Box } from '@mui/material'; 
+import { _userAbout, _userFeeds, _userFriends, _userGallery, _userFollowers } from 'src/_mock';
 import {
   fetchTeacherByUserId,
   selectTeacher,
@@ -35,7 +37,7 @@ export default function TeacherProfile({ id }) {
           minHeight: '100vh',
         }}
       >
-        <CircularProgress color="primary" size={60} />
+       <LoadingScreen />
       </Box>
     );
   }
@@ -56,7 +58,7 @@ export default function TeacherProfile({ id }) {
         role={teacher.role || 'Teacher'}
         name={teacher.name || 'Anonymous'}
         profile_picture={teacher.profile_picture}
-        coverUrl={teacher.coverURL || '/default-cover.jpg'}
+        coverUrl={_userAbout.coverUrl}
         city_name={teacher.city_name || 'Unknown'}
         email={teacher.email || 'No email provided'}
         phone_number={teacher.phone_number || 'No phone number provided'}
