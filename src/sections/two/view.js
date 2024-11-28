@@ -12,6 +12,9 @@ import {
   Select,
   MenuItem,
   Button,
+  Card,
+  FormLabel,
+  InputLabel,
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -93,6 +96,7 @@ export default function AvailabilityView() {
       .unwrap()
       .then((data) => {
         if (data) {
+          console.log(data)
           // Transform API response into the required form format
           const availabilityData = days.reduce((acc, day) => {
             const daySlots = data.filter((slot) => slot.day === day);
@@ -168,123 +172,136 @@ export default function AvailabilityView() {
       <Typography variant="h5" sx={{ mb: 4, fontSize: '1.25rem' }}>
         Availability
       </Typography>
-
+  
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Grid container spacing={2}>
-              <Grid item xs={2}>
-                <Typography variant="body2" sx={{ fontSize: '0.875rem', mb: 2 }}>
-                  Day
-                </Typography>
-              </Grid>
-              <Grid item xs={4}>
-                <Typography variant="body2" sx={{ fontSize: '0.875rem', mb: 2 }}>
+            {days.map((day) => (
+              <Card key={day} sx={{ p: 3, mb: 3 }}>
+               <Grid container spacing={2} alignItems="flex-start" justifyContent="space-between">
+  <Grid item xs={12} sm={3} sx={{ display: 'flex', alignItems: 'flex-start' }}>
+    <Controller
+      name={`availability.${day}.checked`}
+      control={control}
+      render={({ field }) => (
+<FormControlLabel
+  control={
+    <Checkbox
+      {...field}
+      checked={field.value}
+      onChange={() => handleCheckboxChange(day)}
+      sx={{ padding: '0 8px 0 0' }} // Adjust spacing between checkbox and label
+    />
+  }
+  label={
+    <Typography variant="body2" sx={{ fontSize: '1rem' }}>
+      {day}
+    </Typography>
+  }
+  sx={{ display: 'flex', mb: 2 }} // Ensures both are on the same line
+/>
+
+      )}
+    />
+  </Grid>
+
+  <Grid item xs={12} sm={9} sx={{ flexGrow: 1 }}>
+    <Controller
+      name={`availability.${day}.slots`}
+      control={control}
+      render={({ field }) => (
+        <Box>
+          {field.value.map((slot, index) => (
+            <Grid container spacing={2} alignItems="center" key={index}>
+              <Grid item xs={12} sm={5}>
+                <InputLabel htmlFor={`start-time-${day}-${index}`} sx={{ fontSize: '0.875rem', mb: 1 }}>
                   Start Time
-                </Typography>
+                </InputLabel>
+                <Select
+                  id={`start-time-${day}-${index}`}
+                  fullWidth
+                  value={slot.start}
+                  onChange={(e) => {
+                    const updatedSlots = [...field.value];
+                    updatedSlots[index].start = e.target.value;
+                    setValue(`availability.${day}.slots`, updatedSlots);
+                  }}
+                  variant="outlined"
+                  displayEmpty
+                  sx={{ height: '56px', mb: 1 }}
+                >
+                  {times.map((time) => (
+                    <MenuItem key={time} value={time}>
+                      <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                        {time}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </Select>
               </Grid>
-              <Grid item xs={4}>
-                <Typography variant="body2" sx={{ fontSize: '0.875rem', mb: 2 }}>
+
+              <Grid item xs={12} sm={5}>
+                <InputLabel htmlFor={`end-time-${day}-${index}`} sx={{ fontSize: '0.875rem', mb: 1 }}>
                   End Time
-                </Typography>
+                </InputLabel>
+                <Select
+                  id={`end-time-${day}-${index}`}
+                  fullWidth
+                  value={slot.end}
+                  onChange={(e) => {
+                    const updatedSlots = [...field.value];
+                    updatedSlots[index].end = e.target.value;
+                    setValue(`availability.${day}.slots`, updatedSlots);
+                  }}
+                  variant="outlined"
+                  displayEmpty
+                  sx={{ height: '56px', mb: 1 }}
+                >
+                  {times.map((time) => (
+                    <MenuItem key={time} value={time}>
+                      <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+                        {time}
+                      </Typography>
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.availability?.[day]?.slots?.[index]?.end && (
+                  <Typography color="error" sx={{ fontSize: '0.75rem', mb: 1 }}>
+                    {errors.availability[day].slots[index].end.message}
+                  </Typography>
+                )}
+              </Grid>
+
+              <Grid item xs={12} sm={2}>
+                <IconButton color="error" onClick={() => removeSlot(day, index)}>
+                  <Icon icon="ion:trash-outline" />
+                </IconButton>
               </Grid>
             </Grid>
-
-            {days.map((day) => (
-              <Grid container spacing={2} alignItems="center" sx={{ mb: 4 }} key={day}>
-                <Grid item xs={2}>
-                  <Controller
-                    name={`availability.${day}.checked`}
-                    control={control}
-                    render={({ field }) => (
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            {...field}
-                            checked={field.value}
-                            onChange={() => handleCheckboxChange(day)}
-                          />
-                        }
-                        label={<Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{day}</Typography>}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={10}>
-                  <Box>
-                    <Controller
-                      name={`availability.${day}.slots`}
-                      control={control}
-                      render={({ field }) => (
-                        <Box>
-                          {field.value.map((slot, index) => (
-                            <Grid container spacing={2} alignItems="center" key={index}>
-                              <Grid item xs={4}>
-                                <Select
-                                  fullWidth
-                                  value={slot.start}
-                                  onChange={(e) => {
-                                    const updatedSlots = [...field.value];
-                                    updatedSlots[index].start = e.target.value;
-                                    setValue(`availability.${day}.slots`, updatedSlots);
-                                  }}
-                                  variant="outlined"
-                                  displayEmpty
-                                  sx={{ height: '56px', mb: 1 }}
-                                >
-                                  {times.map((time) => (
-                                    <MenuItem key={time} value={time}>
-                                      <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{time}</Typography>
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                              </Grid>
-                              <Grid item xs={4}>
-                                <Select
-                                  fullWidth
-                                  value={slot.end}
-                                  onChange={(e) => {
-                                    const updatedSlots = [...field.value];
-                                    updatedSlots[index].end = e.target.value;
-                                    setValue(`availability.${day}.slots`, updatedSlots);
-                                  }}
-                                  variant="outlined"
-                                  displayEmpty
-                                  sx={{ height: '56px', mb: 1 }}
-                                >
-                                  {times.map((time) => (
-                                    <MenuItem key={time} value={time}>
-                                      <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>{time}</Typography>
-                                    </MenuItem>
-                                  ))}
-                                </Select>
-                                {errors.availability?.[day]?.slots?.[index]?.end && (
-                                  <Typography color="error" sx={{ fontSize: '0.75rem', mb: 1 }}>
-                                    {errors.availability[day].slots[index].end.message}
-                                  </Typography>
-                                )}
-                              </Grid>
-                              <Grid item xs={2}>
-                                <IconButton color="error" sx={{ ml: 3 }} onClick={() => removeSlot(day, index)}>
-                                  <Icon icon="ion:trash-outline" />
-                                </IconButton>
-                              </Grid>
-                            </Grid>
-                          ))}
-                          <Button onClick={() => addSlot(day)} sx={{ mt: 3 }} variant="outlined">
-                            Add Slot
-                          </Button>
-                        </Box>
-                      )}
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
+          ))}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+            <Button onClick={() => addSlot(day)} variant="outlined">
+              Add Slot
+            </Button>
+          </Box>
+        </Box>
+      )}
+    />
+  </Grid>
+</Grid>
+              </Card>
             ))}
           </Grid>
         </Grid>
+  
         <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-          <LoadingButton type="button" loading={isBackLoading} onClick={handleBackClick} variant="contained" color="inherit">
+          <LoadingButton
+            type="button"
+            loading={isBackLoading}
+            onClick={handleBackClick}
+            variant="contained"
+            color="inherit"
+          >
             Back
           </LoadingButton>
           <LoadingButton type="submit" variant="contained" loading={isNextLoading}>

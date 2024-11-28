@@ -1,32 +1,23 @@
 import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
 // @mui
-import { useTheme } from '@mui/material/styles';
 import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
-// routes
-import { RouterLink } from 'src/routes/components';
+// next
+import NextLink from 'next/link';
 
 // ----------------------------------------------------------------------
 
-// Logo.js
-
 const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
-  const theme = useTheme();
-
-  const PRIMARY_LIGHT = theme.palette.primary.light;
-  const PRIMARY_MAIN = theme.palette.primary.main;
-  const PRIMARY_DARK = theme.palette.primary.dark;
-
-  // Option to use an SVG file from the public folder
   const logo = (
     <Box
       ref={ref}
       component="img"
-      src="/logo/beelogo.png" // Adjust the path to match your file location
+      src="/logo/beelogo.png" // Replace with the correct path to your image
+      alt="Logo"
       sx={{
-        width: 110, // Increased width for a larger logo
-        height: 110, // Increased height for a larger logo
+        width: 70, // Adjust size as needed
+        height: 70, // Adjust size as needed
         display: 'inline-flex',
         ...sx,
       }}
@@ -39,7 +30,11 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
   }
 
   return (
-    <Link component={RouterLink} href="/" sx={{ display: 'contents' }}>
+    <Link
+      component={NextLink}
+      href="/" // This is the Next.js equivalent of routing to the homepage
+      sx={{ display: 'inline-flex' }}
+    >
       {logo}
     </Link>
   );

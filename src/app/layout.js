@@ -18,6 +18,7 @@ import { primaryFont } from 'src/theme/typography';
 import ProgressBar from 'src/components/progress-bar';
 import { MotionLazy } from 'src/components/animate/motion-lazy';
 import { SettingsProvider, SettingsDrawer } from 'src/components/settings';
+import FloatingChatButton from 'src/components/FloatingButton';
 
 // Auth
 import { AuthProvider, AuthConsumer } from 'src/auth/context/jwt';
@@ -52,6 +53,8 @@ export default function RootLayout({ children, session }) {
                     </ClientProvider>
                   </AuthConsumer>
                 </MotionLazy>
+                {/* Floating Chat Button */}
+                <FloatingChatButton />
               </ThemeProvider>
             </SettingsProvider>
           </AuthProvider>

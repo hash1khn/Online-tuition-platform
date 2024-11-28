@@ -94,12 +94,12 @@ export function useNavData(teacherId) {
             icon: ICONS.analytics,
             roles: ['student'],
           },
-             // {
-        //   title: 'Devs',
-        //   path: paths.dashboard.group.six,
-        //   icon: ICONS.ecommerce,
-        //   roles: ['teacher', 'student'],
-        // },
+             {
+          title: 'About Us',
+          path: paths.dashboard.group.six,
+          icon: ICONS.ecommerce,
+          roles: ['teacher', 'student'],
+        },
           // {
         //   title: 'Teachers profile',
         //   path: paths.dashboard.user.id(teacherId), // Ensure teacherId is passed
