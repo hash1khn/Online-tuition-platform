@@ -100,6 +100,12 @@ export function useNavData(teacherId) {
           icon: ICONS.ecommerce,
           roles: ['teacher', 'student'],
         },
+        {
+          title: 'Contracts',
+          path: paths.dashboard.user.list,
+          icon: ICONS.ecommerce,
+          roles: [ 'student'],
+        },
           // {
         //   title: 'Teachers profile',
         //   path: paths.dashboard.user.id(teacherId), // Ensure teacherId is passed

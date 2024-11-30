@@ -20,6 +20,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import LoadingButton from '@mui/lab/LoadingButton';
 import RHFTextField from 'src/components/hook-form/rhf-text-field'; // Ensure this path is correct
+import getStripe from "src/utils/get-stripe";
 
 const BookSessionDialog = ({ open, onClose }) => {
   // Validation schema
@@ -37,9 +38,9 @@ const BookSessionDialog = ({ open, onClose }) => {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-    //   student_id: '',
-    //   teacher_id: '',
-    //   subject_id: '',
+      //   student_id: '',
+      //   teacher_id: '',
+      //   subject_id: '',
       start_date: '',
       end_date: '',
       mode: '',
@@ -53,6 +54,29 @@ const BookSessionDialog = ({ open, onClose }) => {
     control,
     formState: { errors },
   } = methods;
+
+  const handlePrice = async () => {
+    const checkoutSession = await fetch('/api/checkout_sess', {
+      method: 'POST',
+      headers: { origin: 'http://localhost:3035' },
+    })
+    const checkoutSessionJson = await checkoutSession.json()
+
+    if (checkoutSession.statusCode === 500) {
+      console.error(checkoutSessionJson.message)
+      return
+    }
+  
+    const stripe = await getStripe()
+    const {error} = await stripe.redirectToCheckout({
+      sessionId: checkoutSessionJson.id,
+    })
+  
+    if (error) {
+      console.warn(error.message)
+    }
+  }
+
 
   // Dummy onSubmit function
   const onSubmit = (data) => {
@@ -102,7 +126,7 @@ const BookSessionDialog = ({ open, onClose }) => {
 
               {/* Session Details Card */}
               <Card sx={{ p: 3 }}>
-                <Typography  sx={{ mb: 2 }} variant="h6" gutterBottom>
+                <Typography sx={{ mb: 2 }} variant="h6" gutterBottom>
                   Session Details
                 </Typography>
                 <Grid container spacing={3}>
@@ -156,7 +180,7 @@ const BookSessionDialog = ({ open, onClose }) => {
                   Payment Information
                 </Typography>
                 <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={4}>
                     <RHFTextField
                       name="payment_terms"
                       label="Payment Terms"
@@ -164,13 +188,22 @@ const BookSessionDialog = ({ open, onClose }) => {
                       helperText={errors.payment_terms?.message}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={4}>
                     <RHFTextField
                       name="status"
                       label="Status"
                       fullWidth
                       helperText={errors.status?.message}
                     />
+                  </Grid>
+                  <Grid item xs={12} sm= {4}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick= {handlePrice}
+                    >
+                      Pay Now
+                    </Button>
                   </Grid>
                 </Grid>
               </Card>

@@ -19,7 +19,7 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
 // _mock
-import { _userList, _roles, USER_STATUS_OPTIONS } from 'src/_mock';
+import { _userList, USER_STATUS_OPTIONS } from 'src/_mock';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
@@ -49,12 +49,12 @@ import UserTableFiltersResult from '../user-table-filters-result';
 const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'phoneNumber', label: 'Phone Number', width: 180 },
-  { id: 'company', label: 'Company', width: 220 },
-  { id: 'role', label: 'Role', width: 180 },
-  { id: 'status', label: 'Status', width: 100 },
-  { id: '', width: 88 },
+  { id: 'name', label: 'Teacher Name' },
+  { id: 'subject', label: 'Subjects', width: 180 },
+  { id: 'startDate', label: 'Start Date', width: 220 },
+  { id: 'endDate', label: 'End Date', width: 180 },
+  { id: 'staus', label: 'Status', width: 100 },
+  { id: '', width: 180},
 ];
 
 const defaultFilters = {
@@ -89,7 +89,7 @@ export default function UserListView() {
     table.page * table.rowsPerPage + table.rowsPerPage
   );
 
-  const denseHeight = table.dense ? 52 : 72;
+  // const denseHeight = table.dense ? 52 : 72;
 
   const canReset = !isEqual(defaultFilters, filters);
 
@@ -141,10 +141,9 @@ export default function UserListView() {
     [handleFilters]
   );
 
-  const handleResetFilters = useCallback(() => {
-    setFilters(defaultFilters);
-  }, []);
-
+  // const handleResetFilters = useCallback(() => {
+  //   setFilters(defaultFilters);
+  // }, []);
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -152,19 +151,10 @@ export default function UserListView() {
           heading="List"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'User', href: paths.dashboard.user.root },
-            { name: 'List' },
+         
+          
           ]}
-          action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.user.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              New User
-            </Button>
-          }
+        
           sx={{
             mb: { xs: 3, md: 5 },
           }}
@@ -193,7 +183,7 @@ export default function UserListView() {
                     color={
                       (tab.value === 'active' && 'success') ||
                       (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'banned' && 'error') ||
+                      // (tab.value === 'banned' && 'error') ||
                       'default'
                     }
                   >
@@ -203,9 +193,9 @@ export default function UserListView() {
 
                     {tab.value === 'pending' &&
                       _userList.filter((user) => user.status === 'pending').length}
-                    {tab.value === 'banned' &&
-                      _userList.filter((user) => user.status === 'banned').length}
-                    {tab.value === 'rejected' &&
+                    {/* {tab.value === 'banned' &&
+                      _userList.filter((user) => user.status === 'banned').length} */}
+                    {tab.value === 'completed' &&
                       _userList.filter((user) => user.status === 'rejected').length}
                   </Label>
                 }
@@ -213,24 +203,24 @@ export default function UserListView() {
             ))}
           </Tabs>
 
-          <UserTableToolbar
+          {/* <UserTableToolbar
             filters={filters}
             onFilters={handleFilters}
             //
             roleOptions={_roles}
-          />
+          /> */}
 
-          {canReset && (
+          {/* {canReset && (
             <UserTableFiltersResult
               filters={filters}
               onFilters={handleFilters}
-              //
+              
               onResetFilters={handleResetFilters}
-              //
+              
               results={dataFiltered.length}
               sx={{ p: 2.5, pt: 0 }}
             />
-          )}
+          )} */}
 
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
             <TableSelectedAction
@@ -287,7 +277,7 @@ export default function UserListView() {
                     ))}
 
                   <TableEmptyRows
-                    height={denseHeight}
+                    // height={denseHeight}
                     emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
                   />
 
@@ -316,7 +306,7 @@ export default function UserListView() {
         title="Delete"
         content={
           <>
-            Are you sure want to delete <strong> {table.selected.length} </strong> items?
+            Are you sure want to cancel <strong> {table.selected.length} </strong> items?
           </>
         }
         action={
@@ -328,7 +318,7 @@ export default function UserListView() {
               confirm.onFalse();
             }}
           >
-            Delete
+            Cancel
           </Button>
         }
       />
