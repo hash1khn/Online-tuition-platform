@@ -1,46 +1,42 @@
 import { useMemo } from 'react';
-import { paths } from 'src/routes/paths';
 import SvgColor from 'src/components/svg-color';
 import { useAuthContext } from 'src/auth/hooks';
 
-// Define icons
+// Import Material Design icons (Mud Icons)
+import PersonIcon from '@mui/icons-material/Person';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ArticleIcon from '@mui/icons-material/Article';
+import DescriptionIcon from '@mui/icons-material/Description';
+import InfoIcon from '@mui/icons-material/Info'; 
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import GavelIcon from '@mui/icons-material/Gavel';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable'; 
+
 const icon = (name) => (
   <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />
 );
 
+// Define icons for navigation
 const ICONS = {
-  job: icon('ic_job'),
-  blog: icon('ic_blog'),
-  chat: icon('ic_chat'),
-  mail: icon('ic_mail'),
-  user: icon('ic_user'),
-  file: icon('ic_file'),
-  lock: icon('ic_lock'),
-  tour: icon('ic_tour'),
-  order: icon('ic_order'),
-  label: icon('ic_label'),
-  blank: icon('ic_blank'),
-  kanban: icon('ic_kanban'),
-  folder: icon('ic_folder'),
-  banking: icon('ic_banking'),
-  booking: icon('ic_booking'),
-  invoice: icon('ic_invoice'),
-  product: icon('ic_product'),
-  calendar: icon('ic_calendar'),
-  disabled: icon('ic_disabled'),
-  external: icon('ic_external'),
-  menuItem: icon('ic_menu_item'),
-  ecommerce: icon('ic_ecommerce'),
-  analytics: icon('ic_analytics'),
-  dashboard: icon('ic_dashboard'),
+  user: <PersonIcon sx={{ fontSize: 24 }} />,
+  dashboard: <DashboardIcon sx={{ fontSize: 24 }} />,
+  analytics: <AnalyticsIcon sx={{ fontSize: 24 }} />,
+  order: <ShoppingCartIcon sx={{ fontSize: 24 }} />,
+  label: <ArticleIcon sx={{ fontSize: 24 }} />,
+  contracts: <DescriptionIcon sx={{ fontSize: 24 }} />,
+  about: <InfoIcon sx={{ fontSize: 24 }} />,
+  profile: <AccountCircleIcon sx={{ fontSize: 24 }} />,
+  terms: <GavelIcon sx={{ fontSize: 24 }} />,
+  availability: <EventAvailableIcon sx={{ fontSize: 24 }} />,
+  // Add more Material icons or custom SVG icons as needed
 };
 
 export function useNavData(teacherId) {
-  // Get the current user's role from the authentication context
   const { user } = useAuthContext();
   const currentRole = user?.role;
 
-  // Memoize the filtered navigation data
   const data = useMemo(() => {
     const navItems = [
       {
@@ -48,82 +44,73 @@ export function useNavData(teacherId) {
         items: [
           {
             title: 'Update Profile',
-            path: paths.dashboard.user.new,
+            path: '/dashboard/user/new',
             icon: ICONS.user,
             roles: ['teacher', 'student'],
           },
           {
-            title: 'Student profile',
-            path: paths.dashboard.group.seven,
-            icon: ICONS.user,
+            title: 'Student Profile',
+            path: '/dashboard/group/seven',
+            icon: ICONS.profile,
             roles: ['student'],
           },
           {
             title: 'Setup Profile',
-            path: paths.dashboard.user.complete,
-            icon: ICONS.dashboard,
+            path: '/dashboard/user/complete',
+            icon: ICONS.profile,
             roles: ['teacher'],
           },
           {
             title: 'Terms & Conditions',
-            path: paths.dashboard.one,
-            icon: ICONS.order,
+            path: '/dashboard/one',
+            icon: ICONS.terms,
             roles: ['teacher'],
           },
           {
             title: 'Availability',
-            path: paths.dashboard.two,
-            icon: ICONS.ecommerce,
+            path: '/dashboard/two',
+            icon: ICONS.availability,
             roles: ['teacher'],
           },
           {
             title: 'Service',
-            path: paths.dashboard.three,
+            path: '/dashboard/three',
             icon: ICONS.analytics,
             roles: ['teacher'],
           },
           {
             title: 'Teachers Cards',
-            path: paths.dashboard.user.cards,
+            path: '/dashboard/user/cards',
             icon: ICONS.dashboard,
             roles: ['student'],
           },
           {
             title: 'Reviews',
-            path: paths.dashboard.group.five,
+            path: '/dashboard/group/five',
             icon: ICONS.analytics,
             roles: ['student'],
           },
-             {
-          title: 'About Us',
-          path: paths.dashboard.group.six,
-          icon: ICONS.ecommerce,
-          roles: ['teacher', 'student'],
-        },
-        {
-          title: 'Contracts',
-          path: paths.dashboard.user.list,
-          icon: ICONS.ecommerce,
-          roles: [ 'student'],
-        },
-          // {
-        //   title: 'Teachers profile',
-        //   path: paths.dashboard.user.id(teacherId), // Ensure teacherId is passed
-        //   icon: ICONS.user,
-        //   roles: ['student'],
-        // },
+          {
+            title: 'About Us',
+            path: '/dashboard/group/six',
+            icon: ICONS.about,
+            roles: ['teacher', 'student'],
+          },
+          {
+            title: 'Contracts',
+            path: '/dashboard/user/list',
+            icon: ICONS.contracts,
+            roles: ['student'],
+          },
         ],
       },
     ];
 
-    // Filter items based on the user's role
     return navItems.map((section) => ({
       ...section,
-      items: section.items.filter((item) =>
-        item.roles.includes(currentRole)
-      ),
+      items: section.items.filter((item) => item.roles.includes(currentRole)),
     }));
-  }, [currentRole]); // Re-compute only when currentRole changes
+  }, [currentRole]);
 
   return data;
 }

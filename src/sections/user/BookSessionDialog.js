@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   Dialog,
@@ -14,6 +14,8 @@ import {
   Typography,
   Card,
   Box,
+  Chip,
+  OutlinedInput,
 } from '@mui/material';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -21,31 +23,52 @@ import * as Yup from 'yup';
 import LoadingButton from '@mui/lab/LoadingButton';
 import RHFTextField from 'src/components/hook-form/rhf-text-field'; // Ensure this path is correct
 import getStripe from "src/utils/get-stripe";
+import { useDispatch } from 'react-redux';
+import createContract from '../../app/store/slices/contractsSlice';
 
-const BookSessionDialog = ({ open, onClose }) => {
+const BookSessionDialog = ({ open, onClose, teacher_id }) => {
+  const [subjects, setSubjects] = useState([]);
+  const dispatch = useDispatch();
+  const [successSnackbar, setSuccessSnackbar] = useState(false);
+
+
+  // Fetch teacher's subjects using teacher_id
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        const response = await fetch(`/api/teachers/${teacher_id}/subjects`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch subjects');
+        }
+        const data = await response.json();
+        setSubjects(data);
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+      }
+    };
+
+    if (teacher_id) {
+      fetchSubjects();
+    }
+  }, [teacher_id]);
+
   // Validation schema
   const schema = Yup.object().shape({
-    // student_id: Yup.string().required('Student ID is required'),
-    // teacher_id: Yup.string().required('Teacher ID is required'),
-    // subject_id: Yup.string().required('Subject ID is required'),
     start_date: Yup.date().required('Start Date is required'),
     end_date: Yup.date().required('End Date is required'),
     mode: Yup.string().required('Mode is required'),
-    payment_terms: Yup.string().required('Payment terms are required'),
-    status: Yup.string().required('Status is required'),
+    subjects: Yup.array()
+      .of(Yup.number().required('Subject is required'))
+      .min(1, 'At least one subject must be selected'),
   });
 
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      //   student_id: '',
-      //   teacher_id: '',
-      //   subject_id: '',
       start_date: '',
       end_date: '',
       mode: '',
-      payment_terms: '',
-      status: '',
+      subjects: [],
     },
   });
 
@@ -59,29 +82,39 @@ const BookSessionDialog = ({ open, onClose }) => {
     const checkoutSession = await fetch('/api/checkout_sess', {
       method: 'POST',
       headers: { origin: 'http://localhost:3035' },
-    })
-    const checkoutSessionJson = await checkoutSession.json()
+    });
+    const checkoutSessionJson = await checkoutSession.json();
 
     if (checkoutSession.statusCode === 500) {
-      console.error(checkoutSessionJson.message)
-      return
+      console.error(checkoutSessionJson.message);
+      return;
     }
-  
-    const stripe = await getStripe()
-    const {error} = await stripe.redirectToCheckout({
+
+    const stripe = await getStripe();
+    const { error } = await stripe.redirectToCheckout({
       sessionId: checkoutSessionJson.id,
-    })
-  
+    });
+
     if (error) {
-      console.warn(error.message)
+      console.warn(error.message);
     }
-  }
+  };
 
-
-  // Dummy onSubmit function
-  const onSubmit = (data) => {
-    console.log('Form submitted:', data);
-    onClose(); // Close dialog after submission
+  // Submit function
+  const onSubmit = async (data) => {
+    const payload = {
+      ...data,
+    };
+    try {
+      console.log(payload)
+      const action = await dispatch(createContract(payload));
+      console.log('Dispatched Action:', action); // Dispatch the thunk
+      setSuccessSnackbar(true);
+      reset(); // Reset form on success
+      onClose(); // Close dialog
+    } catch (error) {
+      console.error('Failed to create contract:', error);
+    }
   };
 
   return (
@@ -91,39 +124,6 @@ const BookSessionDialog = ({ open, onClose }) => {
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Box sx={{ display: 'grid', gap: 3 }}>
-              {/* Contract Details Card */}
-              {/* <Card sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  Contract Details
-                </Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
-                    <RHFTextField
-                      name="student_id"
-                      label="Student ID"
-                      fullWidth
-                      helperText={errors.student_id?.message}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <RHFTextField
-                      name="teacher_id"
-                      label="Teacher ID"
-                      fullWidth
-                      helperText={errors.teacher_id?.message}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <RHFTextField
-                      name="subject_id"
-                      label="Subject ID"
-                      fullWidth
-                      helperText={errors.subject_id?.message}
-                    />
-                  </Grid>
-                </Grid>
-              </Card> */}
-
               {/* Session Details Card */}
               <Card sx={{ p: 3 }}>
                 <Typography sx={{ mb: 2 }} variant="h6" gutterBottom>
@@ -155,6 +155,7 @@ const BookSessionDialog = ({ open, onClose }) => {
                       }}
                     />
                   </Grid>
+
                   <Grid item xs={12} sm={6}>
                     <Box sx={{ mb: 2 }}>
                       <InputLabel>Mode</InputLabel>
@@ -171,11 +172,46 @@ const BookSessionDialog = ({ open, onClose }) => {
                       <FormHelperText>{errors.mode?.message}</FormHelperText>
                     </Box>
                   </Grid>
+
+                  <Grid item xs={12}>
+  <Box sx={{ mb: 2 }}>
+    <InputLabel>Subjects</InputLabel>
+    <Controller
+      name="subjects"
+      control={control}
+      render={({ field }) => (
+        <Select
+          {...field}
+          fullWidth
+          multiple
+          value={field.value || []} // Ensure the value is always an array
+          onChange={(e) => field.onChange(e.target.value)} // Handle array value updates
+          input={<OutlinedInput />}
+          renderValue={(selected) =>
+            subjects
+              .filter((subject) => selected.includes(subject.subject_id))
+              .map((subject) => subject.name)
+              .join(', ')
+          }
+        >
+          {subjects.map((subject) => (
+            <MenuItem key={subject.subject_id} value={subject.subject_id}>
+              {subject.name}
+            </MenuItem>
+          ))}
+        </Select>
+      )}
+    />
+    <FormHelperText>{errors.subjects?.message}</FormHelperText>
+  </Box>
+</Grid>
+
                 </Grid>
               </Card>
 
+
               {/* Payment Information Card */}
-              <Card sx={{ p: 3 }}>
+              {/* <Card sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   Payment Information
                 </Typography>
@@ -206,7 +242,7 @@ const BookSessionDialog = ({ open, onClose }) => {
                     </Button>
                   </Grid>
                 </Grid>
-              </Card>
+              </Card> */}
             </Box>
           </form>
         </FormProvider>
@@ -226,6 +262,7 @@ const BookSessionDialog = ({ open, onClose }) => {
 BookSessionDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  teacher_id: PropTypes.number.isRequired,
 };
 
 export default BookSessionDialog;

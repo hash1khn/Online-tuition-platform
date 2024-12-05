@@ -5,16 +5,28 @@ export const saveStudentData = createAsyncThunk(
   'student/saveStudentData',
   async (studentData, { rejectWithValue }) => {
     try {
-      // Simulating an API call
-      const response = await new Promise((resolve) =>
-        setTimeout(() => resolve(studentData), 1500)
-      );
-      return response;
+      const response = await fetch('/api/students', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Add authorization if required
+        },
+        body: JSON.stringify(studentData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save student data');
+      }
+
+      const data = await response.json();
+      console.log(data)
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
+
 
 // Async thunk for updating student data
 export const updateStudent = createAsyncThunk(

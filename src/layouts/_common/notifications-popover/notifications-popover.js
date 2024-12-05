@@ -1,86 +1,77 @@
 'use client';
 
 import { m } from 'framer-motion';
-import { useState, useCallback } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 // @mui
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
-import List from '@mui/material/List';
-import Stack from '@mui/material/Stack';
-import Badge from '@mui/material/Badge';
-import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
+import {
+  Tab,
+  Box,
+  Tabs,
+  List,
+  Stack,
+  Badge,
+  Drawer,
+  Button,
+  Divider,
+  Tooltip,
+  IconButton,
+  Typography,
+} from '@mui/material';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
-// _mock
-import { _notifications } from 'src/_mock';
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { varHover } from 'src/components/animate';
-//
+// Redux
+import { useDispatch, useSelector } from 'react-redux';
+import { markAsRead } from  '../../../../src/app/store/slices/notificationSlice'
 import NotificationItem from './notification-item';
 
-// ----------------------------------------------------------------------
-
 const TABS = [
-  {
-    value: 'all',
-    label: 'All',
-    count: 22,
-  },
-  {
-    value: 'unread',
-    label: 'Unread',
-    count: 12,
-  },
-  {
-    value: 'archived',
-    label: 'Archived',
-    count: 10,
-  },
+  { value: 'all', label: 'All' },
+  // { value: 'unread', label: 'Unread' },
 ];
-
-// ----------------------------------------------------------------------
 
 export default function NotificationsPopover() {
   const drawer = useBoolean();
-
   const smUp = useResponsive('up', 'sm');
+  const dispatch = useDispatch();
+
+  const notifications = useSelector((state) => state.notifications.notifications);
+  const totalUnRead = useMemo(
+    () => notifications.filter((notification) => !notification.is_read).length,
+    [notifications]
+  );
 
   const [currentTab, setCurrentTab] = useState('all');
+  const filteredNotifications = useMemo(
+    () =>
+      currentTab === 'all'
+        ? notifications
+        : notifications.filter((notification) => !notification.is_read),
+    [notifications, currentTab]
+  );
 
-  const handleChangeTab = useCallback((event, newValue) => {
-    setCurrentTab(newValue);
-  }, []);
-
-  const [notifications, setNotifications] = useState(_notifications);
-
-  const totalUnRead = notifications.filter((item) => item.isUnRead === true).length;
+  const handleChangeTab = useCallback((_, newValue) => setCurrentTab(newValue), []);
 
   const handleMarkAllAsRead = () => {
-    setNotifications(
-      notifications.map((notification) => ({
-        ...notification,
-        isUnRead: false,
-      }))
-    );
+    notifications
+      .filter((notification) => !notification.is_read)
+      .forEach((notification) =>
+        dispatch(markAsRead({ notification_id: notification.notification_id }))
+      );
   };
 
-  const renderHead = (
-    <Stack direction="row" alignItems="center" sx={{ py: 2, pl: 2.5, pr: 1, minHeight: 68 }}>
+  const renderHeader = (
+    <Stack direction="row" alignItems="center" sx={{ py: 2, px: 2.5 }}>
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
         Notifications
       </Typography>
 
-      {!!totalUnRead && (
+      {totalUnRead > 0 && (
         <Tooltip title="Mark all as read">
           <IconButton color="primary" onClick={handleMarkAllAsRead}>
             <Iconify icon="eva:done-all-fill" />
@@ -96,41 +87,37 @@ export default function NotificationsPopover() {
     </Stack>
   );
 
-  const renderTabs = (
-    <Tabs value={currentTab} onChange={handleChangeTab}>
-      {TABS.map((tab) => (
-        <Tab
-          key={tab.value}
-          iconPosition="end"
-          value={tab.value}
-          label={tab.label}
-          icon={
-            <Label
-              variant={((tab.value === 'all' || tab.value === currentTab) && 'filled') || 'soft'}
-              color={
-                (tab.value === 'unread' && 'info') ||
-                (tab.value === 'archived' && 'success') ||
-                'default'
-              }
-            >
-              {tab.count}
-            </Label>
-          }
-          sx={{
-            '&:not(:last-of-type)': {
-              mr: 3,
-            },
-          }}
-        />
-      ))}
-    </Tabs>
-  );
+  // const renderTabs = (
+  //   <Tabs value={currentTab} onChange={handleChangeTab} sx={{ px: 2.5 }}>
+  //     {TABS.map((tab) => (
+  //       <Tab
+  //         key={tab.value}
+  //         value={tab.value}
+  //         label={
+  //           <Stack direction="row" spacing={1} alignItems="center">
+  //             <span>{tab.label}</span>
+  //             <Label
+  //               variant={currentTab === tab.value ? 'filled' : 'soft'}
+  //               color={tab.value === 'unread' ? 'info' : 'default'}
+  //             >
+  //               {tab.value === 'all' ? notifications.length : totalUnRead}
+  //             </Label>
+  //           </Stack>
+  //         }
+  //         sx={{
+  //           '&:not(:last-of-type)': { mr: 3 },
+  //           typography: 'body2',
+  //         }}
+  //       />
+  //     ))}
+  //   </Tabs>
+  // );
 
   const renderList = (
-    <Scrollbar>
+    <Scrollbar sx={{ px: 1, py: 2 }}>
       <List disablePadding>
-        {notifications.map((notification) => (
-          <NotificationItem key={notification.id} notification={notification} />
+        {filteredNotifications.map((notification) => (
+          <NotificationItem key={notification.notification_id} notification={notification} />
         ))}
       </List>
     </Scrollbar>
@@ -155,37 +142,19 @@ export default function NotificationsPopover() {
         open={drawer.value}
         onClose={drawer.onFalse}
         anchor="right"
-        slotProps={{
-          backdrop: { invisible: true },
-        }}
         PaperProps={{
           sx: { width: 1, maxWidth: 420 },
         }}
       >
-        {renderHead}
-
-        <Divider />
-
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{ pl: 2.5, pr: 1 }}
-        >
-          {renderTabs}
-          <IconButton onClick={handleMarkAllAsRead}>
-            <Iconify icon="solar:settings-bold-duotone" />
-          </IconButton>
-        </Stack>
-
-        <Divider />
-
+        {renderHeader}
+        {/* <Divider />
+        {renderTabs} */}
+        <Divider sx={{mt:3}}/>
         {renderList}
-
         <Box sx={{ p: 1 }}>
-          <Button fullWidth size="large">
+          {/* <Button fullWidth size="large" variant="contained">
             View All
-          </Button>
+          </Button> */}
         </Box>
       </Drawer>
     </>

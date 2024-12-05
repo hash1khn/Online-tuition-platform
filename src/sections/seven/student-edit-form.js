@@ -1,65 +1,122 @@
 'use client';
 
 import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
+import {
+  Box,
+  Card,
+  Typography,
+  MenuItem,
+  FormControl,
+  Select,
+  InputLabel,
+  IconButton,
+  Divider,
+  Stack,
+  FormHelperText,
+} from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
+import AddOutlined from '@mui/icons-material/AddOutlined';
 import * as Yup from 'yup';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import Card from '@mui/material/Card';
-import Box from '@mui/material/Box';
-import { MenuItem, Select, InputLabel, FormControl, Typography, FormHelperText } from '@mui/material';
-import Stack from '@mui/material/Stack';
-import LoadingButton from '@mui/lab/LoadingButton';
-import IconButton from '@mui/material/IconButton';
-import DeleteOutlined from '@mui/icons-material/DeleteOutlined';
-import Divider from '@mui/material/Divider';
-import AddOutlined from '@mui/icons-material/AddOutlined';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux'; 
-import { saveStudentData,updateStudent } from 'src/app/store/slices/studentslice';
+import { useDispatch, useSelector } from 'react-redux';
 
-// ----------------------------------------------------------------------
+import { saveStudentData } from 'src/app/store/slices/studentslice';
+
+// Validation schema
+const StudentSchema = Yup.object().shape({
+  domain: Yup.string().required('Domain is required'),
+  subDomain: Yup.string().required('Sub-domain is required'),
+  address:Yup.string().required('Address is required'),
+  guardianName: Yup.string().required('Guardian name is required'),
+  guardianPhone: Yup.string()
+    .required('Guardian phone number is required')
+    .matches(/^\d{10}$/, 'Phone number must be 10 digits'),
+  subjects: Yup.array()
+    .of(Yup.string().required('Subject is required'))
+    .min(1, 'At least one subject must be added'),
+});
 
 export default function StudentEditForm({ currentStudent }) {
   const [isLoading, setIsLoading] = useState(false);
-  const dispatch = useDispatch();
+  const [domains, setDomains] = useState([]);
+  const [subDomains, setSubDomains] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [gradeLevels, setGradeLevels] = useState([]);
 
-  const StudentSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    address: Yup.string().required('Address is required'),
-    phone: Yup.string()
-      .required('Phone number is required')
-      .matches(/^\d{10}$/, 'Phone number must be 10 digits'),
-    guardianName: Yup.string().required('Guardian name is required'),
-    guardianPhone: Yup.string()
-      .required('Guardian phone number is required')
-      .matches(/^\d{10}$/, 'Phone number must be 10 digits'),
-    subjects: Yup.array()
-      .of(Yup.string().required('Subject is required'))
-      .min(1, 'At least one subject must be added'),
-    grade: Yup.string().required('Grade level is required'),
-  });
+  const dispatch = useDispatch();
+  const studentState = useSelector((state) => state.student);
 
   const methods = useForm({
     resolver: yupResolver(StudentSchema),
     defaultValues: {
-      name: currentStudent?.name || '',
+      domain: currentStudent?.domain || '',
+      subDomain: currentStudent?.subDomain || '',
       address: currentStudent?.address || '',
-      phone: currentStudent?.phone || '',
       guardianName: currentStudent?.guardianName || '',
       guardianPhone: currentStudent?.guardianPhone || '',
       subjects: currentStudent?.subjects || [],
-      grade: currentStudent?.grade || '',
     },
   });
 
   const { handleSubmit, control, watch, setValue, formState: { errors } } = methods;
 
+  useEffect(() => {
+    // Fetch domains and subjects from backend
+    const fetchDomains = async () => {
+      try {
+        const response = await fetch('/api/grade-levels');
+        const gradeLevelsData = await response.json();
+        setGradeLevels(gradeLevelsData);
+
+        const uniqueDomains = [
+          ...new Set(gradeLevelsData.map((grade) => grade.domain)),
+        ];
+        setDomains(uniqueDomains);
+      } catch (error) {
+        console.error('Failed to fetch domains:', error);
+      }
+    };
+
+    const fetchSubjects = async () => {
+      try {
+        const response = await fetch('/api/subjects');
+        const subjectsData = await response.json();
+        setSubjects(subjectsData);
+      } catch (error) {
+        console.error('Failed to fetch subjects:', error);
+      }
+    };
+
+    fetchDomains();
+    fetchSubjects();
+  }, []);
+
   const onSubmit = async (data) => {
     setIsLoading(true);
-    console.log('Form Data Submitted:', data);
 
-    dispatch(updateStudent({ ...data, id: currentStudent.id }));
+    // Map selected subDomain to grade level ID
+    const grade_level_id = gradeLevels.find((grade) => grade.sub_level === data.subDomain)?.grade_level_id;
+
+    // Map selected subjects to subject IDs
+    const subjectIds = data.subjects.map((subjectName) =>
+      subjects.find((subject) => subject.name === subjectName)?.subject_id
+    );
+
+    const payload = {
+      grade_level_id, // Single grade level ID
+      guardian_address: data.address,
+      guardian_name: data.guardianName,
+      guardian_phone: data.guardianPhone,
+      subjects: subjectIds, // Array of subject IDs
+    };
+  
+    console.log('Payload Submitted:', payload);
+
+    await dispatch(saveStudentData(payload));
 
     setTimeout(() => {
       setIsLoading(false);
@@ -67,21 +124,40 @@ export default function StudentEditForm({ currentStudent }) {
     }, 1500);
   };
 
+  const handleDomainChange = async (e) => {
+    const selectedDomain = e.target.value;
+    setValue('domain', selectedDomain);
+    setSubDomains([]);
+    setValue('subDomain', ''); // Reset sub-domain when domain changes
+
+    // Fetch sub-domains based on the selected domain
+    try {
+      const response = await fetch('/api/grade-levels');
+      const gradeLevels = await response.json();
+      const filteredSubDomains = gradeLevels
+        .filter((grade) => grade.domain === selectedDomain)
+        .map((grade) => grade.sub_level);
+      setSubDomains(filteredSubDomains);
+    } catch (error) {
+      console.error('Failed to fetch sub-domains:', error);
+    }
+  };
+
   const handleAddSubject = () => {
-    const subjects = watch('subjects');
-    setValue('subjects', [...subjects, '']);
+    const currentSubjects = watch('subjects');
+    setValue('subjects', [...currentSubjects, '']);
   };
 
   const handleRemoveSubject = (index) => {
-    const subjects = watch('subjects');
-    const updatedSubjects = subjects.filter((_, i) => i !== index);
+    const currentSubjects = watch('subjects');
+    const updatedSubjects = currentSubjects.filter((_, i) => i !== index);
     setValue('subjects', updatedSubjects);
   };
 
   const handleSubjectChange = (index, value) => {
-    const subjects = watch('subjects');
-    subjects[index] = value;
-    setValue('subjects', [...subjects]);
+    const currentSubjects = watch('subjects');
+    currentSubjects[index] = value;
+    setValue('subjects', [...currentSubjects]);
   };
 
   const subjectCount = watch('subjects').length;
@@ -98,23 +174,53 @@ export default function StudentEditForm({ currentStudent }) {
           <Divider sx={{ mb: 2 }} />
 
           <Box display="grid" gap={2}>
-            {/* Grade Level */}
-            <FormControl fullWidth error={!!errors.grade}>
-              <InputLabel>Grade Level</InputLabel>
+            {/* Domain */}
+            <FormControl fullWidth error={!!errors.domain}>
+              <InputLabel>Domain</InputLabel>
               <Controller
-                name="grade"
+                name="domain"
                 control={control}
                 render={({ field }) => (
-                  <Select {...field} label="Grade Level">
-                    <MenuItem value="O level">O level</MenuItem>
-                    <MenuItem value="A level">A level</MenuItem>
-                    <MenuItem value="Intermediate">Intermediate</MenuItem>
+                  <Select
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      handleDomainChange(e);
+                    }}
+                    label="Domain"
+                  >
+                    {domains.map((domain) => (
+                      <MenuItem key={domain} value={domain}>
+                        {domain}
+                      </MenuItem>
+                    ))}
                   </Select>
                 )}
               />
-              {errors.grade && (
-                <FormHelperText>{errors.grade.message}</FormHelperText>
-              )}
+              {errors.domain && <FormHelperText>{errors.domain.message}</FormHelperText>}
+            </FormControl>
+
+            {/* Sub-Domain */}
+            <FormControl fullWidth error={!!errors.subDomain}>
+              <InputLabel>Sub-Domain</InputLabel>
+              <Controller
+                name="subDomain"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    label="Sub-Domain"
+                    disabled={!subDomains.length}
+                  >
+                    {subDomains.map((subDomain) => (
+                      <MenuItem key={subDomain} value={subDomain}>
+                        {subDomain}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                )}
+              />
+              {errors.subDomain && <FormHelperText>{errors.subDomain.message}</FormHelperText>}
             </FormControl>
 
             {/* Subjects */}
@@ -133,7 +239,7 @@ export default function StudentEditForm({ currentStudent }) {
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', // Flexible layout
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
                 gap: 2,
               }}
             >
@@ -146,14 +252,22 @@ export default function StudentEditForm({ currentStudent }) {
                     gap: 1,
                   }}
                 >
-                  <RHFTextField
-                    name={`subjects[${index}]`}
-                    label={`Subject ${index + 1}`}
-                    placeholder="e.g., Mathematics"
-                    value={subject}
-                    onChange={(e) => handleSubjectChange(index, e.target.value)}
-                    fullWidth
-                  />
+                  <FormControl fullWidth error={!!errors.subjects?.[index]}>
+                    <InputLabel>Subject {index + 1}</InputLabel>
+                    <Select
+                      value={subject}
+                      onChange={(e) => handleSubjectChange(index, e.target.value)}
+                    >
+                      {subjects.map((subjectItem) => (
+                        <MenuItem key={subjectItem.subject_id} value={subjectItem.name}>
+                          {subjectItem.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {errors.subjects?.[index] && (
+                      <FormHelperText>{errors.subjects[index]?.message}</FormHelperText>
+                    )}
+                  </FormControl>
                   <IconButton
                     color="error"
                     onClick={() => handleRemoveSubject(index)}
@@ -166,20 +280,14 @@ export default function StudentEditForm({ currentStudent }) {
             </Box>
           </Box>
         </Card>
-
-        {/* Guardian Details */}
-        <Card sx={{ p: 3, mb: 3 }}>
+         {/* Guardian Details */}
+         <Card sx={{ p: 3, mb: 3 }}>
           <Typography variant="h6" gutterBottom>
             Guardian Details
           </Typography>
 
           <Divider sx={{ mb: 2 }} />
-          
-          <Box
-            display="grid"
-            gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr' }} // 1 column for small screens, 2 for larger
-            gap={2}
-          >
+          <Box display="grid" gap={2}>
             <RHFTextField
               name="guardianName"
               label="Guardian Name"
@@ -194,8 +302,6 @@ export default function StudentEditForm({ currentStudent }) {
               error={!!errors.guardianPhone}
               helperText={errors.guardianPhone?.message}
             />
-          </Box>
-          <Box sx={{ mt: 2 }}>
             <RHFTextField
               name="address"
               label="Address"
@@ -227,12 +333,13 @@ export default function StudentEditForm({ currentStudent }) {
 StudentEditForm.propTypes = {
   currentStudent: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    name: PropTypes.string, // Add this line
-    phone: PropTypes.string, 
+    domain: PropTypes.string,
+    subDomain: PropTypes.string,
+    name: PropTypes.string,
+    phone: PropTypes.string,
     guardianName: PropTypes.string,
     guardianPhone: PropTypes.string,
     address: PropTypes.string,
     subjects: PropTypes.arrayOf(PropTypes.string),
-    grade: PropTypes.string,
   }),
 };

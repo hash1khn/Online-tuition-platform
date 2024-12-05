@@ -10,17 +10,42 @@ export const createContract = createAsyncThunk(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Include Authorization header
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify(contractData),
       });
 
+      console.log(response);
+      
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to create contract');
       }
 
-      return await response.json(); // Assuming the API returns the created contract
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Thunk for fetching all contracts
+export const fetchAllContracts = createAsyncThunk(
+  'contracts/fetchAllContracts',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/api/contracts', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch contracts');
+      }
+
+      return await response.json(); // Assuming API returns a list of contracts
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -31,27 +56,38 @@ export const createContract = createAsyncThunk(
 const contractSlice = createSlice({
   name: 'contracts',
   initialState: {
-    contracts: [], // List of all contracts
-    contract: null, // Single contract (for newly created or fetched details)
-    loading: false, // Loading state
-    error: null, // Error state
+    contracts: [],
+    contract: null,
+    loading: false,
+    error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Handling createContract thunk
       .addCase(createContract.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(createContract.fulfilled, (state, action) => {
         state.loading = false;
-        state.contract = action.payload; // Set the created contract
-        state.contracts.push(action.payload); // Add to the contracts list if needed
+        state.contract = action.payload;
+        state.contracts.push(action.payload);
       })
       .addCase(createContract.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to create contract';
+      })
+      .addCase(fetchAllContracts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllContracts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.contracts = action.payload;
+      })
+      .addCase(fetchAllContracts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch contracts';
       });
   },
 });

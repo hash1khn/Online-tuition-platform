@@ -108,7 +108,7 @@ export default function UserCard({ user }) {
       </Card>
 
       {/* Book Session Dialog */}
-      <BookSessionDialog open={open} onClose={handleClose} />
+      <BookSessionDialog teacher_id={teacher_id} open={open} onClose={handleClose} />
     </>
   );
 }

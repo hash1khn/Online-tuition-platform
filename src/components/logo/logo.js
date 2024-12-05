@@ -13,11 +13,11 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
     <Box
       ref={ref}
       component="img"
-      src="/logo/beelogo.png" // Replace with the correct path to your image
+      src="/logo/beelogo-darkmode.png" // Replace with the correct path to your image
       alt="Logo"
       sx={{
-        width: 70, // Adjust size as needed
-        height: 70, // Adjust size as needed
+        width: 80, // Adjust size as needed
+        height: 80, // Adjust size as needed
         display: 'inline-flex',
         ...sx,
       }}
