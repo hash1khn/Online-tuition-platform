@@ -1,7 +1,7 @@
 'use client';
 
 import { m } from 'framer-motion';
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 // @mui
 import {
   Tab,
@@ -27,12 +27,11 @@ import Scrollbar from 'src/components/scrollbar';
 import { varHover } from 'src/components/animate';
 // Redux
 import { useDispatch, useSelector } from 'react-redux';
-import { markAsRead } from  '../../../../src/app/store/slices/notificationSlice'
+import { markAsRead, fetchNotifications } from '../../../../src/app/store/slices/notificationSlice'; // Adjust path as needed
 import NotificationItem from './notification-item';
 
 const TABS = [
   { value: 'all', label: 'All' },
-  // { value: 'unread', label: 'Unread' },
 ];
 
 export default function NotificationsPopover() {
@@ -40,7 +39,15 @@ export default function NotificationsPopover() {
   const smUp = useResponsive('up', 'sm');
   const dispatch = useDispatch();
 
+  // Fetch notifications on mount
+  useEffect(() => {
+    dispatch(fetchNotifications());
+  }, [dispatch]);
+
   const notifications = useSelector((state) => state.notifications.notifications);
+  const loading = useSelector((state) => state.notifications.loading);
+  const error = useSelector((state) => state.notifications.error);
+
   const totalUnRead = useMemo(
     () => notifications.filter((notification) => !notification.is_read).length,
     [notifications]
@@ -87,39 +94,17 @@ export default function NotificationsPopover() {
     </Stack>
   );
 
-  // const renderTabs = (
-  //   <Tabs value={currentTab} onChange={handleChangeTab} sx={{ px: 2.5 }}>
-  //     {TABS.map((tab) => (
-  //       <Tab
-  //         key={tab.value}
-  //         value={tab.value}
-  //         label={
-  //           <Stack direction="row" spacing={1} alignItems="center">
-  //             <span>{tab.label}</span>
-  //             <Label
-  //               variant={currentTab === tab.value ? 'filled' : 'soft'}
-  //               color={tab.value === 'unread' ? 'info' : 'default'}
-  //             >
-  //               {tab.value === 'all' ? notifications.length : totalUnRead}
-  //             </Label>
-  //           </Stack>
-  //         }
-  //         sx={{
-  //           '&:not(:last-of-type)': { mr: 3 },
-  //           typography: 'body2',
-  //         }}
-  //       />
-  //     ))}
-  //   </Tabs>
-  // );
-
   const renderList = (
     <Scrollbar sx={{ px: 1, py: 2 }}>
-      <List disablePadding>
-        {filteredNotifications.map((notification) => (
-          <NotificationItem key={notification.notification_id} notification={notification} />
-        ))}
-      </List>
+      {loading && <Typography sx={{ px: 2 }}>Loading notifications...</Typography>}
+      {error && <Typography sx={{ px: 2, color: 'error.main' }}>Failed to load notifications</Typography>}
+      {!loading && !error && (
+        <List disablePadding>
+          {filteredNotifications.map((notification) => (
+            <NotificationItem key={notification.notification_id} notification={notification} />
+          ))}
+        </List>
+      )}
     </Scrollbar>
   );
 
@@ -147,15 +132,9 @@ export default function NotificationsPopover() {
         }}
       >
         {renderHeader}
-        {/* <Divider />
-        {renderTabs} */}
-        <Divider sx={{mt:3}}/>
+        <Divider sx={{ mt: 3 }} />
         {renderList}
-        <Box sx={{ p: 1 }}>
-          {/* <Button fullWidth size="large" variant="contained">
-            View All
-          </Button> */}
-        </Box>
+        <Box sx={{ p: 1 }} />
       </Drawer>
     </>
   );

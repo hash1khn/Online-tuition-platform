@@ -1,6 +1,7 @@
 'use client';
 
 import PropTypes from 'prop-types';
+import { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -9,46 +10,55 @@ import CardHeader from '@mui/material/CardHeader';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
+import { useDispatch, useSelector } from 'react-redux';
+import { getTeacherAvailability } from 'src/app/store/slices/availabilityslice';
+import dayjs from 'dayjs';
+import UserCardListBySubject from './user-card-profile-home';
 
+// Icons
 import SchoolIcon from '@mui/icons-material/School';
 import InfoIcon from '@mui/icons-material/Info';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import BookIcon from '@mui/icons-material/Book';
 import LanguageIcon from '@mui/icons-material/Language';
-import LayersIcon from '@mui/icons-material/Layers';
-import ProfilePostItem from './profile-post-item';
-import UserCardListBySubject from './user-card-profile-home';
-// ----------------------------------------------------------------------
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 
-export default function ProfileHome({ info, posts }) {
+export default function ProfileHome({ info, teacher_id, posts }) {
   const theme = useTheme();
+  const dispatch = useDispatch();
+  const { availability, loading, error } = useSelector((state) => state.availability);
 
-  const sharedChipStyle = {
+  useEffect(() => {
+    if (teacher_id) {
+      dispatch(getTeacherAvailability(teacher_id));
+    }
+  }, [dispatch, teacher_id]);
+
+  const sectionColors = {
+    overview: '#ffb000',
+    sessionDetails: ' #bf7a00',
+    subjects: '#bf7a00',
+    languages: '#e0a200',
+    availability: '#bf7a00',
+  };
+
+  const dayColors = {
+    Monday: '#e6b200',
+    Tuesday: '#d99c00',
+    Wednesday: '#f0b800',
+    Thursday: '#cc9900',
+    Friday: '#ffb700',
+    Saturday: '#e6a000',
+    Sunday: '#e0a800',
+  };
+
+  const chipStyle = (backgroundColor) => ({
+    backgroundColor,
+    color: '#000',
     fontSize: '0.9rem',
     padding: '4px 8px',
     borderRadius: '16px',
-    color: 'black',
-  };
-
-  const langChipStyle = {
-    ...sharedChipStyle,
-    backgroundColor: '#e4cafe',
-  };
-
-  const overviewChipStyle = {
-    ...sharedChipStyle,
-    backgroundColor: '#b2e3c7',
-  };
-
-  const sessionChipStyle = {
-    ...sharedChipStyle,
-    backgroundColor: '#b8e4e3',
-  };
-
-  const subjectChipStyle = {
-    ...sharedChipStyle,
-    backgroundColor: '#b3c6f0',
-  };
+  });
 
   const sectionTitle = (icon, title) => (
     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -59,52 +69,73 @@ export default function ProfileHome({ info, posts }) {
     </Box>
   );
 
-  const renderBio = (
+  const renderOverview = (
+    <Card sx={{ p: 3 }}>
+      {sectionTitle(<InfoIcon />, 'Overview')}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        <Chip label={`ID: ${info.teacher_id || 'Not Available'}`} sx={chipStyle(sectionColors.overview)} />
+        <Chip label={`Gender: ${info.gender || 'Not Specified'}`} sx={chipStyle(sectionColors.overview)} />
+        <Chip label={`Experience: ${info.experience_years || 0} years`} sx={chipStyle(sectionColors.overview)} />
+        <Chip
+          label={`Verified: ${info.is_verified ? 'Yes' : 'No'}`}
+          sx={chipStyle(sectionColors.overview)}
+        />
+      </Box>
+    </Card>
+  );
+
+    const renderBio = (
     <Card>
       <CardHeader title={sectionTitle(<SchoolIcon />, 'Biography & Education')} />
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Box sx={{ typography: 'body2' }}>
-        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 700 }}>
-          Bio:
-        </Typography>{' '}
-        {info.bio || 'No bio available'}
+        <Box sx={{ typography: 'body1' }}>
+          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 800 }}>
+            Bio:
+          </Typography>{' '}
+          {info.bio || 'No bio available'}
         </Box>
-        <Box sx={{ typography: 'body2' }}>
-        <Typography component="span" variant="subtitle1" sx={{ fontWeight: 700 }}>
-          Education:
-        </Typography>{' '}
-        {info.education || 'No education available'}
+        <Box sx={{ typography: 'body1' }}>
+          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 800 }}>
+            Education:
+          </Typography>{' '}
+          {info.education || 'No education available'}
         </Box>
       </Stack>
     </Card>
   );
-
-  const renderOverview = (
-    <Card sx={{ p: 3 }}>
-      {sectionTitle(<InfoIcon />, 'Overview')}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-        <Chip label={`ID: ${info.teacher_id || 'Not Available'}`} sx={overviewChipStyle} />
-        <Chip label={`Gender: ${info.gender || 'Not Specified'}`} sx={overviewChipStyle} />
-        <Chip label={`Experience: ${info.experience_years} years`} sx={overviewChipStyle} />
-        <Chip
-          label={`Verified Status: ${info.is_verified ? 'Verified' : 'Not Verified'}`}
-          sx={overviewChipStyle}
-        />
-        <Chip label={`Rating: ${info.rating || 'Not Rated'} stars`} sx={overviewChipStyle} />
-      </Box>
+  const renderReview = (
+    <Card>
+      <CardHeader title={sectionTitle(<SchoolIcon />, 'Biography & Education')} />
+      <Stack spacing={2} sx={{ p: 3 }}>
+        <Box sx={{ typography: 'body1' }}>
+          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 800 }}>
+            Bio:
+          </Typography>{' '}
+          {info.bio || 'No bio available'}
+        </Box>
+        <Box sx={{ typography: 'body1' }}>
+          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 800 }}>
+            Education:
+          </Typography>{' '}
+          {info.education || 'No education available'}
+        </Box>
+      </Stack>
     </Card>
   );
 
   const renderSessionDetails = (
     <Card sx={{ p: 3 }}>
       {sectionTitle(<ScheduleIcon />, 'Session Details')}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-        <Chip label={`Hourly Rate: $${info.hourly_rate}`} sx={sessionChipStyle} />
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        <Chip label={`Hourly Rate: $${info.hourly_rate}`} sx={chipStyle(sectionColors.sessionDetails)} />
         <Chip
-          label={`Session Duration: ${info.duration_per_session} mins`}
-          sx={sessionChipStyle}
+          label={`Duration: ${info.duration_per_session || 0} mins`}
+          sx={chipStyle(sectionColors.sessionDetails)}
         />
-        <Chip label={`Teaching Mode: ${info.teaching_mode}`} sx={sessionChipStyle} />
+        <Chip
+          label={`Mode: ${info.teaching_mode}`}
+          sx={chipStyle(sectionColors.sessionDetails)}
+        />
       </Box>
     </Card>
   );
@@ -112,31 +143,14 @@ export default function ProfileHome({ info, posts }) {
   const renderSubjects = (
     <Card sx={{ p: 3 }}>
       {sectionTitle(<BookIcon />, 'Subjects')}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-        {info.subjects && info.subjects.length > 0 ? (
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        {info.subjects?.length > 0 ? (
           info.subjects.map((subject, index) => (
-            <Chip key={index} label={subject} sx={subjectChipStyle} />
+            <Chip key={index} label={subject} sx={chipStyle(sectionColors.subjects)} />
           ))
         ) : (
-          <Typography variant="body2" color="text.secondary">
-            No subjects available.
-          </Typography>
+          <Typography>No subjects available</Typography>
         )}
-      </Box>
-
-      <Box sx={{ mt: 3 }}>
-        {sectionTitle(<LayersIcon />, 'Grade Levels')}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-          {info.grade_levels && info.grade_levels.length > 0 ? (
-            info.grade_levels.map((level, index) => (
-              <Chip key={index} label={level} sx={subjectChipStyle} />
-            ))
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              No grade levels available.
-            </Typography>
-          )}
-        </Box>
       </Box>
     </Card>
   );
@@ -144,23 +158,80 @@ export default function ProfileHome({ info, posts }) {
   const renderLanguages = (
     <Card sx={{ p: 3 }}>
       {sectionTitle(<LanguageIcon />, 'Languages')}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-        {info.languages && info.languages.length > 0 ? (
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        {info.languages?.length > 0 ? (
           info.languages.map((language, index) => (
-            <Chip key={index} label={language} sx={langChipStyle} />
+            <Chip key={index} label={language} sx={chipStyle(sectionColors.languages)} />
           ))
         ) : (
-          <Typography variant="body2" color="text.secondary">
-            No languages available.
-          </Typography>
+          <Typography>No languages available</Typography>
         )}
       </Box>
     </Card>
   );
 
+  const renderAvailability = () => {
+        if (loading) {
+          return <Typography variant="body2" color="text.secondary">Loading availability...</Typography>;
+        }
+      
+        if (error) {
+          return <Typography variant="body2" color="text.secondary">Failed to load availability.</Typography>;
+        }
+      
+        // Ensure availability is an array before calling .reduce
+        const availabilityData = Array.isArray(availability) ? availability : [];
+      
+        if (availabilityData.length === 0) {
+          return <Typography variant="body2" color="text.secondary">No availability information provided.</Typography>;
+        }
+      
+        // Transform data to group slots by day
+        const groupedAvailability = availabilityData.reduce((acc, slot) => {
+          if (!acc[slot.day]) {
+            acc[slot.day] = [];
+          }
+      
+          // Add today's date to the time string to ensure dayjs can parse it
+          const startTime = `${new Date().toISOString().split('T')[0]}T${slot.start_time}`;
+          const endTime = `${new Date().toISOString().split('T')[0]}T${slot.end_time}`;
+      
+          // Format the times with dayjs
+          const formattedSlot = `${dayjs(startTime).format('hh:mm A')} - ${dayjs(endTime).format('hh:mm A')}`;
+          acc[slot.day].push(formattedSlot);
+          return acc;
+        }, {});
+      
+        return (
+          <Card sx={{ p: 3 }}>
+            {sectionTitle(<EventAvailableIcon />, 'Availability')}
+            <Stack spacing={2}>
+              {Object.entries(groupedAvailability).map(([day, times], index) => (
+                <Box key={index}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      color: theme.palette.mode === 'dark' ? 'white' : 'text.primary',
+                    }}
+                  >
+                    {day}:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {times.map((time, idx) => (
+                      <Chip key={idx} label={time} sx={chipStyle(sectionColors.availability)} />
+                    ))}
+                  </Box>
+                </Box>
+              ))}
+            </Stack>
+          </Card>
+        );
+      };    
+
   return (
     <Grid container spacing={3}>
-
       <Grid xs={12} md={6}>
         <Stack spacing={3}>
           {renderOverview}
@@ -174,41 +245,16 @@ export default function ProfileHome({ info, posts }) {
           {renderLanguages}
         </Stack>
       </Grid>
+      <Grid xs={12}>{renderBio}</Grid>
+      <Grid xs={12}>{renderAvailability()}</Grid>
+      <Grid xs={12}>{renderReview}</Grid>
 
       <Grid xs={12}>
-        {renderBio}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h4">Similar Subject Faculty</Typography>
+        </Box>
+        <UserCardListBySubject subjects={info.subjects} />
       </Grid>
-
-      <Grid xs={12}>
-
-
-<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 }}>
-  <Typography
-    variant="h3"  // Slightly larger heading for more prominence
-    sx={{
-      fontWeight: '600',  // Medium boldness for a professional look
-      color: 'text.primary',
-      mt : 5,
-      mb : 5,
-
-      textAlign: 'center',
-      letterSpacing: 1.5,  // Adds space between letters for better readability
-        // Margin below for spacing
-      textTransform: 'uppercase',  // Optional: adds emphasis by capitalizing the title
-      borderBottom: '2px solid',  // Optional: underline effect for a professional look
-      width: 'fit-content',  // Ensures the border wraps the title text
-      pb: 1,  // Padding below the text to give space between text and underline
-    }}
-  >
-    Teacher Teaching Similar Subjects
-  </Typography>
-</Box>
-
-
-  <Stack spacing={3}>
-    <UserCardListBySubject />
-  </Stack>
-</Grid>
     </Grid>
   );
 }
@@ -218,19 +264,17 @@ ProfileHome.propTypes = {
     bio: PropTypes.string,
     experience_years: PropTypes.number,
     teacher_id: PropTypes.string,
-    gender: PropTypes.string,
-    age: PropTypes.number,
     education: PropTypes.string,
-    name :  PropTypes.string,
-    is_verified: PropTypes.bool,
+    gender: PropTypes.string,
     rating: PropTypes.number,
-    area :PropTypes.string,
-    hourly_rate: PropTypes.string,
+    is_verified: PropTypes.bool,
+    hourly_rate: PropTypes.number,
     duration_per_session: PropTypes.number,
+    subjects: PropTypes.array,
+    grade_levels: PropTypes.array,
+    languages: PropTypes.array,
     teaching_mode: PropTypes.string,
-    subjects: PropTypes.arrayOf(PropTypes.string),
-    grade_levels: PropTypes.arrayOf(PropTypes.string),
-    languages: PropTypes.arrayOf(PropTypes.string),
-  }),
-  posts: PropTypes.array,
+  }).isRequired,
+  teacher_id: PropTypes.string.isRequired,
+  posts: PropTypes.array.isRequired,
 };

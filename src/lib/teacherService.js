@@ -174,44 +174,44 @@ export async function filterTeachers(filters) {
       )`
     );
     values.push(grade);
-    index += 1; // Increment index
+    index += 1;
   }
 
   // Filter by subjects
-  if (subjects) {
+  if (subjects && Array.isArray(subjects) && subjects.length > 0) {
     conditions.push(
       `t.teacher_id IN (
         SELECT ts.teacher_id
         FROM teacher_subjects ts
         JOIN subjects s ON ts.subject_id = s.subject_id
-        WHERE s.name = $${index}
+        WHERE s.name = ANY($${index})
       )`
     );
     values.push(subjects);
-    index += 1; // Increment index
+    index += 1;
   }
 
   // Filter by languages
-  if (languages) {
+  if (languages && Array.isArray(languages) && languages.length > 0) {
     conditions.push(
       `t.teacher_id IN (
         SELECT tl.teacher_id
         FROM teacher_languages tl
         JOIN languages l ON tl.language_id = l.language_id
-        WHERE l.name = $${index}
+        WHERE l.name = ANY($${index})
       )`
     );
     values.push(languages);
-    index += 1; // Increment index
+    index += 1;
   }
 
   // Filter by price
   if (price) {
-    const priceRange = price.split('-').map(Number); // Assuming `price` is a string like "500-1000"
+    const priceRange = price.split('-').map(Number);
     if (priceRange.length === 2) {
       conditions.push(`t.hourly_rate BETWEEN $${index} AND $${index + 1}`);
       values.push(priceRange[0], priceRange[1]);
-      index += 2; // Increment index by 2
+      index += 2;
     }
   }
 
@@ -222,50 +222,54 @@ export async function filterTeachers(filters) {
     );
     const keywordFilter = `%${keyword}%`;
     values.push(keywordFilter, keywordFilter, keywordFilter);
-    index += 3; // Increment index by 3
+    index += 3;
   }
 
   // Combine all conditions
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
   const text = `
-      SELECT 
-        t.teacher_id, 
-        u.name, 
-        u.email, 
-        u.phone_number, 
-        u.gender, 
-        u.dob, 
-        u.profile_picture, 
-        u.area, 
-        c.city_name, 
-        t.teaching_mode, 
-        t.bio, 
-        t.is_verified,
-        t.experience_years, 
-        t.education, 
-        t.rating, 
-        t.hourly_rate,
-        t.duration_per_session,
-        array_agg(DISTINCT lang.name) AS languages,
-        array_agg(DISTINCT gl.sub_level) AS grade_levels,
-        array_agg(DISTINCT s.name) AS subjects
-      FROM teachers t
-      JOIN users u ON t.user_id = u.user_id
-      LEFT JOIN cities c ON u.city_id = c.city_id
-      LEFT JOIN teacher_languages tl ON tl.teacher_id = t.teacher_id
-      LEFT JOIN languages lang ON tl.language_id = lang.language_id
-      LEFT JOIN teacher_grade_levels tgl ON tgl.teacher_id = t.teacher_id
-      LEFT JOIN grade_levels gl ON tgl.grade_level_id = gl.grade_level_id
-      LEFT JOIN teacher_subjects ts ON ts.teacher_id = t.teacher_id
-      LEFT JOIN subjects s ON ts.subject_id = s.subject_id
-      ${whereClause}
-      GROUP BY t.teacher_id, u.user_id, c.city_name;
-    `;
+    SELECT 
+      t.teacher_id, 
+      u.name, 
+      u.email, 
+      u.phone_number, 
+      u.gender, 
+      u.dob, 
+      u.profile_picture, 
+      u.area, 
+      c.city_name, 
+      t.teaching_mode, 
+      t.bio, 
+      t.is_verified,
+      t.experience_years, 
+      t.education, 
+      t.rating, 
+      t.hourly_rate,
+      t.duration_per_session,
+      array_agg(DISTINCT lang.name) AS languages,
+      array_agg(DISTINCT gl.sub_level) AS grade_levels,
+      array_agg(DISTINCT s.name) AS subjects
+    FROM teachers t
+    JOIN users u ON t.user_id = u.user_id
+    LEFT JOIN cities c ON u.city_id = c.city_id
+    LEFT JOIN teacher_languages tl ON tl.teacher_id = t.teacher_id
+    LEFT JOIN languages lang ON tl.language_id = lang.language_id
+    LEFT JOIN teacher_grade_levels tgl ON tgl.teacher_id = t.teacher_id
+    LEFT JOIN grade_levels gl ON tgl.grade_level_id = gl.grade_level_id
+    LEFT JOIN teacher_subjects ts ON ts.teacher_id = t.teacher_id
+    LEFT JOIN subjects s ON ts.subject_id = s.subject_id
+    ${whereClause}
+    GROUP BY t.teacher_id, u.user_id, c.city_name;
+  `;
+
+  console.log('Generated Query:', text);
+  console.log('Query Parameters:', values);
 
   const result = await query(text, values);
   return result.rows;
 }
+
 
 
 

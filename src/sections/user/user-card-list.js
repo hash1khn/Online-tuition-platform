@@ -65,12 +65,13 @@ export default function   UserCardList() {
   }, [filters]);
 
   return (
-    <Stack spacing={4}>
+    <Stack spacing={4} >
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'flex-end',
           p: 2,
+          mt: -13,
         }}
       >
         <IconButton

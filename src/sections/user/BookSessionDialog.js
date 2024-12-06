@@ -23,8 +23,8 @@ import * as Yup from 'yup';
 import LoadingButton from '@mui/lab/LoadingButton';
 import RHFTextField from 'src/components/hook-form/rhf-text-field'; // Ensure this path is correct
 import getStripe from "src/utils/get-stripe";
-import { useDispatch } from 'react-redux';
-import createContract from '../../app/store/slices/contractsSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import {createContract} from '../../app/store/slices/contractSlice';
 
 const BookSessionDialog = ({ open, onClose, teacher_id }) => {
   const [subjects, setSubjects] = useState([]);
@@ -69,6 +69,7 @@ const BookSessionDialog = ({ open, onClose, teacher_id }) => {
       end_date: '',
       mode: '',
       subjects: [],
+      teacher_id,
     },
   });
 
@@ -103,6 +104,7 @@ const BookSessionDialog = ({ open, onClose, teacher_id }) => {
   // Submit function
   const onSubmit = async (data) => {
     const payload = {
+      teacher_id,
       ...data,
     };
     try {
@@ -110,7 +112,7 @@ const BookSessionDialog = ({ open, onClose, teacher_id }) => {
       const action = await dispatch(createContract(payload));
       console.log('Dispatched Action:', action); // Dispatch the thunk
       setSuccessSnackbar(true);
-      reset(); // Reset form on success
+      // reset(); // Reset form on success
       onClose(); // Close dialog
     } catch (error) {
       console.error('Failed to create contract:', error);
@@ -165,7 +167,7 @@ const BookSessionDialog = ({ open, onClose, teacher_id }) => {
                         render={({ field }) => (
                           <Select {...field} fullWidth defaultValue="">
                             <MenuItem value="online">Online</MenuItem>
-                            <MenuItem value="offline">Offline</MenuItem>
+                            <MenuItem value="physical">Physical</MenuItem>
                           </Select>
                         )}
                       />

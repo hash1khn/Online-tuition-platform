@@ -61,7 +61,9 @@ export default function UserCard({ user }) {
         </Stack>
 
         <Typography variant="body1" sx={{ mt: 2, mb: 2 }}>
-          {bio}
+          {bio && typeof bio === 'string' && bio.split(' ').length > 5
+            ? `${bio.split(' ').slice(0, 5).join(' ')}...`
+            : bio || 'No bio available'}
         </Typography>
 
         <Divider sx={{ my: 2 }} />

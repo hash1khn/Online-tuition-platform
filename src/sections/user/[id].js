@@ -62,9 +62,12 @@ export default function TeacherProfile({ id }) {
         city_name={teacher.city_name || 'Unknown'}
         email={teacher.email || 'No email provided'}
         phone_number={teacher.phone_number || 'No phone number provided'}
+        teacher_id={id}
+        dob={teacher.dob}
       />
+        {console.log(teacher)}
+      <ProfileHome info={teacher} posts={[]} teacher_id={id} />
 
-      <ProfileHome info={teacher} posts={[]} />
     </div>
   );
 }

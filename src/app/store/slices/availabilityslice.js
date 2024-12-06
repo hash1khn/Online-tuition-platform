@@ -1,15 +1,30 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Get availability data (API call to retrieve data)
+// Get availability data (API call to retrieve all availability data)
 export const getAvailability = createAsyncThunk(
   'availability/getAvailability',
-  async (teacherId, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(`/api/teachers/get-teacher-availability`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }, // Adjust token storage as needed
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
-      return response.data; // Return retrieved availability data
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+// Fetch specific teacher availability by teacher_id
+export const getTeacherAvailability = createAsyncThunk(
+  'availability/getTeacherAvailability',
+  async (teacherId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`/api/teachers/${teacherId}/availability`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+      });
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -22,9 +37,9 @@ export const saveAvailability = createAsyncThunk(
   async (availabilityData, { rejectWithValue }) => {
     try {
       const response = await axios.post('/api/teachers/save-teacher-availability', availabilityData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }, // Adjust token storage as needed
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
-      return response.data; // Return saved availability data
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -37,9 +52,9 @@ export const updateAvailability = createAsyncThunk(
   async (availabilityData, { rejectWithValue }) => {
     try {
       const response = await axios.put('/api/teachers/update-teacher-availability', availabilityData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }, // Adjust token storage as needed
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
-      return response.data; // Return updated availability data
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
@@ -47,15 +62,7 @@ export const updateAvailability = createAsyncThunk(
 );
 
 const initialState = {
-  availability: {
-    Monday: { checked: true, slots: [{ start: '09:00 AM', end: '05:00 PM' }] },
-    Tuesday: { checked: true, slots: [{ start: '09:00 AM', end: '05:00 PM' }] },
-    Wednesday: { checked: true, slots: [{ start: '09:00 AM', end: '05:00 PM' }] },
-    Thursday: { checked: true, slots: [{ start: '09:00 AM', end: '05:00 PM' }] },
-    Friday: { checked: true, slots: [{ start: '09:00 AM', end: '05:00 PM' }] },
-    Saturday: { checked: true, slots: [{ start: '09:00 AM', end: '05:00 PM' }] },
-    Sunday: { checked: true, slots: [{ start: '09:00 AM', end: '05:00 PM' }] },
-  },
+  availability: {},
   loading: false,
   error: null,
 };
@@ -66,17 +73,19 @@ const availabilitySlice = createSlice({
   reducers: {
     toggleDayAvailability: (state, action) => {
       const { day } = action.payload;
-      const isChecked = state.availability[day].checked;
-      state.availability[day].checked = !isChecked;
-      state.availability[day].slots = isChecked ? [] : [{ start: '09:00 AM', end: '05:00 PM' }];
+      const isChecked = state.availability[day]?.checked;
+      state.availability[day] = {
+        checked: !isChecked,
+        slots: isChecked ? [] : [{ start: '09:00 AM', end: '05:00 PM' }],
+      };
     },
     addSlot: (state, action) => {
       const { day } = action.payload;
-      state.availability[day].slots.push({ start: '09:00 AM', end: '05:00 PM' });
+      state.availability[day]?.slots.push({ start: '09:00 AM', end: '05:00 PM' });
     },
     removeSlot: (state, action) => {
       const { day, index } = action.payload;
-      state.availability[day].slots.splice(index, 1);
+      state.availability[day]?.slots.splice(index, 1);
     },
   },
   extraReducers: (builder) => {
@@ -90,6 +99,18 @@ const availabilitySlice = createSlice({
         state.availability = action.payload;
       })
       .addCase(getAvailability.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getTeacherAvailability.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getTeacherAvailability.fulfilled, (state, action) => {
+        state.loading = false;
+        state.availability = action.payload;
+      })
+      .addCase(getTeacherAvailability.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

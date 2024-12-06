@@ -107,7 +107,7 @@ export default function MeetTheDevs() {
           {/* Solution */}
           <Grid item xs={12} md={6}>
             <Typography variant="h4" fontWeight="bold" sx={{ color: 'primary.main', mb: 2 }}>
-              The Solution
+              Our Solution
             </Typography>
             <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
               Tutorly redefines the tutoring experience by offering a seamless, user-friendly platform

@@ -35,7 +35,8 @@ export default function ProfileCover({
   email,
   city_name,
   profile_picture,
-  age,
+  teacher_id,
+  dob,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false); // State for dialog
@@ -147,7 +148,11 @@ export default function ProfileCover({
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <AccountBoxIcon color="action" />
                   <Typography variant="body2" color="text.secondary">
-                    {age || 'N/A'}
+                    { new Date(dob).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }) || 'N/A'}
                   </Typography>
                 </Stack>
               </Grid>
@@ -158,17 +163,11 @@ export default function ProfileCover({
         <Button
           variant="contained"
           onClick={handleOpen}
+          color="primary"
           sx={{
             position: 'absolute',
             bottom: 20, // Position button at the bottom
             right: 20, // Position button at the right
-         
-
-            backgroundColor: theme.palette.info.dark,
-            color: 'white',
-            '&:hover': {
-              backgroundColor: theme.palette.info.main,
-            },
           }}
         >
           Book a Session
@@ -176,7 +175,7 @@ export default function ProfileCover({
       </Card>
 
       {/* Dialog for booking a session */}
-      <BookSessionDialog open={open} onClose={handleClose} />
+      <BookSessionDialog teacher_id={teacher_id} open={open} onClose={handleClose} />
     </>
   );
 }
@@ -188,5 +187,6 @@ ProfileCover.propTypes = {
   email: PropTypes.string,
   city_name: PropTypes.string,
   profile_picture: PropTypes.string.isRequired,
-  age: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  dob: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  teacher_id: PropTypes.number,
 };

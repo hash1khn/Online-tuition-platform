@@ -21,7 +21,7 @@ const UserFilterDialog = ({ open, onClose, onFilterChange }) => {
     grade: '',
     subjects: '',
     keyword: '',
-    price: [0, 1000],
+    price: [0, 100],
   });
 
   const [languages, setLanguages] = useState([]);
@@ -64,7 +64,7 @@ const UserFilterDialog = ({ open, onClose, onFilterChange }) => {
   const handleSearch = () => {
     const formattedFilters = {
       ...filters,
-      price: filters.price.join('-'), // Convert the price array [0, 1000] to the string "0-1000"
+      price: filters.price.join('-'), // Convert the price array [0, 100] to the string "0-100"
     };
     onFilterChange(formattedFilters);
     onClose();
@@ -76,7 +76,7 @@ const UserFilterDialog = ({ open, onClose, onFilterChange }) => {
       grade: '',
       subjects: '',
       keyword: '',
-      price: [0, 1000],
+      price: [0, 100],
     });
     onFilterChange({});
   };
@@ -193,7 +193,7 @@ const UserFilterDialog = ({ open, onClose, onFilterChange }) => {
               onChange={handlePriceChange}
               valueLabelDisplay="auto"
               min={0}
-              max={1000}
+              max={100}
               sx={{
                 color: theme.palette.primary.main,
                 '& .MuiSlider-thumb': { borderRadius: '50%' },
@@ -201,7 +201,7 @@ const UserFilterDialog = ({ open, onClose, onFilterChange }) => {
             />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography variant="body2">$0.00</Typography>
-              <Typography variant="body2">$1000.00</Typography>
+              <Typography variant="body2">$100.00</Typography>
             </Box>
           </Grid>
         </Grid>

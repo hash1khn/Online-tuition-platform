@@ -160,8 +160,6 @@ export default function AvailabilityView() {
     const isChecked = getValues(`availability.${day}.checked`);
     setValue(`availability.${day}.checked`, !isChecked);
     if (!isChecked) {
-      setValue(`availability.${day}.slots[0].start`, '09:00 AM');
-      setValue(`availability.${day}.slots[0].end`, '05:00 PM');
     } else {
       setValue(`availability.${day}.slots`, []);
     }

@@ -17,7 +17,7 @@ export default function NotificationItem({ notification }) {
     <ListItemAvatar>
       <Avatar
         alt="User Profile"
-        src={notification.profile_picture}
+        src={notification.image}
         sx={{
           width: 40,
           height: 40,

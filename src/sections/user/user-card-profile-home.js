@@ -4,20 +4,20 @@ import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack'; 
 import { LoadingScreen } from 'src/components/loading-screen';
-//
 import UserCard from './user-card';
-import UserFilter from './user-filter';
-
 
 // ----------------------------------------------------------------------
 
-export default function UserCardListBySubject() {
-  const [users, setUsers] = useState([]); // State for user data
-  const [filters, setFilters] = useState({ subject: '' }); // State for subject filter
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState(null); // Error state
+UserCardListBySubject.propTypes = {
+  subjects: PropTypes.arrayOf(PropTypes.string),
+};
 
-  const fetchFilteredUsersBySubject = async (filterParams) => {
+export default function UserCardListBySubject({ subjects = [] }) {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchFilteredTeachers = async (filters) => {
     setLoading(true);
     setError(null);
 
@@ -27,34 +27,32 @@ export default function UserCardListBySubject() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(filterParams),
+        body: JSON.stringify(filters),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch users');
+        throw new Error('Failed to fetch teachers');
       }
 
       const data = await response.json();
-      setUsers(data); // Update the users state with filtered data
+      setUsers(data);
     } catch (err) {
-      console.error('Error fetching users:', err);
-      setError('Failed to fetch users');
+      console.error('Error fetching teachers:', err);
+      setError('Failed to fetch teachers');
     } finally {
       setLoading(false);
     }
   };
 
-
-  // Initial fetch on mount
   useEffect(() => {
-    fetchFilteredUsersBySubject(filters);
-  }, [filters]); // Add 'filters' as a dependency
+    if (subjects && subjects.length > 0) {
+      fetchFilteredTeachers({ subjects }); // Only send `subjects` in filters
+    }
+  }, [subjects]);
 
   return (
     <Stack spacing={4}>
-    
-
-      {loading && <div><LoadingScreen /></div>}
+      {loading && <LoadingScreen />}
       {error && <div>{error}</div>}
 
       {!loading && !error && (
@@ -68,9 +66,9 @@ export default function UserCardListBySubject() {
           }}
         >
           {users.length > 0 ? (
-            users.map((user) => <UserCard key={user.id} user={user} />)
+            users.map((user) => <UserCard key={user.teacher_id} user={user} />)
           ) : (
-            <div>No users found</div>
+            <div>No teachers found</div>
           )}
         </Box>
       )}
