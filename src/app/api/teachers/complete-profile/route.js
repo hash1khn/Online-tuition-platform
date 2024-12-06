@@ -1,12 +1,13 @@
 // src/app/api/teachers/complete-profile/route.js
+import { query } from 'src/lib/db';
+
 import { verifyToken } from '../../../../lib/auth';
 
 export async function POST(req) {
-    const client = await db.connect();
 
     try {
         // Begin transaction
-        await client.query('BEGIN');
+        await query('BEGIN');
 
         // Extract the token and payload (Assuming you are using JWT)
         const token = req.headers.get('Authorization')?.split(' ')[1];
@@ -55,21 +56,23 @@ export async function POST(req) {
             education,
             duration_per_session,
         ];
-        const teacherResult = await client.query(createTeacherQuery, teacherValues);
+        const teacherResult = await query(createTeacherQuery, teacherValues);
         const newTeacherProfile = teacherResult.rows[0];
 
         // Handle multiple languages
+        // eslint-disable-next-line no-restricted-syntax
         for (const languageId of languages) {
             const addLanguageQuery = `
                 INSERT INTO teacher_languages (teacher_id, language_id)
                 VALUES ($1, $2)
                 RETURNING *`;
             const languageValues = [newTeacherProfile.teacher_id, languageId];
-            await client.query(addLanguageQuery, languageValues);
+            // eslint-disable-next-line no-await-in-loop
+            await query(addLanguageQuery, languageValues);
         }
 
         // Commit transaction
-        await client.query('COMMIT');
+        await query('COMMIT');
 
         return new Response(
             JSON.stringify({
@@ -83,7 +86,7 @@ export async function POST(req) {
         );
     } catch (error) {
         // Rollback transaction in case of an error
-        await client.query('ROLLBACK');
+        await query('ROLLBACK');
         console.error('Error:', error);
         return new Response(
             JSON.stringify({ message: 'Failed to create profile', error: error.message }),
@@ -94,6 +97,6 @@ export async function POST(req) {
         );
     } finally {
         // Release the client
-        client.release();
+    
     }
 }
