@@ -54,7 +54,7 @@ const ChatbotDialog = ({ open, onClose }) => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
-      let result = "";
+      const result = "";
       await reader.read().then(function processText({ done, value }) {
         if (done) {
           return result;
