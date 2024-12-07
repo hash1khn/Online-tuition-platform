@@ -159,11 +159,13 @@ export default function AvailabilityView() {
   const handleCheckboxChange = (day) => {
     const isChecked = getValues(`availability.${day}.checked`);
     setValue(`availability.${day}.checked`, !isChecked);
-    if (!isChecked) {
-    } else {
+  
+    // Clear slots only if unchecked
+    if (isChecked) {
       setValue(`availability.${day}.slots`, []);
     }
   };
+  
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>

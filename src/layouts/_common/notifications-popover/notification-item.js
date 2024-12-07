@@ -90,6 +90,6 @@ NotificationItem.propTypes = {
     type: PropTypes.string.isRequired,
     is_read: PropTypes.bool.isRequired,
     created_at: PropTypes.string.isRequired,
-    profile_picture: PropTypes.string.isRequired, // New profile picture field
+    image: PropTypes.string.isRequired, // New profile picture field
   }).isRequired,
 };

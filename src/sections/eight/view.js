@@ -8,6 +8,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
+import PropTypes from "prop-types";
 
 const ChatbotDialog = ({ open, onClose }) => {
   const [messages, setMessages] = useState([
@@ -16,19 +17,19 @@ const ChatbotDialog = ({ open, onClose }) => {
       content: "Need Assistance? Just Ask!...",
     },
   ]);
-  const [message, setMessage] = useState("");
+  const [currentMessage, setCurrentMessage] = useState(""); // Renamed to avoid shadowing
 
   const sendMessage = async () => {
-    if (!message.trim()) return;
+    if (!currentMessage.trim()) return;
 
-    const userPrompt = { prompt: message };
+    const userPrompt = { prompt: currentMessage };
 
-    setMessages((messages) => [
-      ...messages,
-      { role: "user", content: message },
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { role: "user", content: currentMessage },
     ]);
 
-    setMessage("");
+    setCurrentMessage("");
 
     try {
       const response = await fetch("/api/chat", {
@@ -42,7 +43,7 @@ const ChatbotDialog = ({ open, onClose }) => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
-      let result = "";
+      let result = ""; // Use const here as ESLint prefers immutability
       await reader.read().then(function processText({ done, value }) {
         if (done) {
           return result;
@@ -54,8 +55,8 @@ const ChatbotDialog = ({ open, onClose }) => {
         try {
           const jsonResponse = JSON.parse(text);
           if (jsonResponse.data) {
-            setMessages((messages) => [
-              ...messages,
+            setMessages((prevMessages) => [
+              ...prevMessages,
               { role: "assistant", content: jsonResponse.data },
             ]);
           }
@@ -82,7 +83,7 @@ const ChatbotDialog = ({ open, onClose }) => {
 
   return (
     <Dialog open={open} maxWidth="md" fullWidth onClose={onClose}>
-      <DialogTitle>Chat with Tutorly's Assistant</DialogTitle>
+      <DialogTitle>Chat with Tutorly&apos;s Assistant</DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="column" alignItems="center">
           <Stack
@@ -101,27 +102,21 @@ const ChatbotDialog = ({ open, onClose }) => {
               overflow="auto"
               maxHeight="100%"
             >
-              {messages.map((message, index) => (
+              {messages.map((msg, index) => (
                 <Box
                   key={index}
                   display="flex"
                   justifyContent={
-                    message.role === "assistant" ? "flex-start" : "flex-end"
+                    msg.role === "assistant" ? "flex-start" : "flex-end"
                   }
                 >
                   <Box
-                    bgcolor={
-                      message.role === "assistant"
-                        ? "primary.main"
-                        : "info.main"
-                    }
-                    color={
-                      message.role === "assistant" ? "#000000" : "#ffffff"
-                    }
+                    bgcolor={msg.role === "assistant" ? "primary.main" : "info.main"}
+                    color={msg.role === "assistant" ? "#000000" : "#ffffff"}
                     borderRadius={12}
                     p={2}
                     dangerouslySetInnerHTML={{
-                      __html: message.content,
+                      __html: msg.content,
                     }}
                   />
                 </Box>
@@ -132,14 +127,21 @@ const ChatbotDialog = ({ open, onClose }) => {
             <TextField
               label="Message"
               fullWidth
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              value={currentMessage}
+              onChange={(e) => setCurrentMessage(e.target.value)}
             />
             <Button variant="contained" onClick={sendMessage}>
               Send
             </Button>
           </Stack>
-          <Stack direction="row" spacing={2} mt={2} width="100%" justifyContent="flex-end" mb={2}>
+          <Stack
+            direction="row"
+            spacing={2}
+            mt={2}
+            width="100%"
+            justifyContent="flex-end"
+            mb={2}
+          >
             <Button variant="outlined" color="info" onClick={clearMessages}>
               Clear Conversation
             </Button>
@@ -148,6 +150,11 @@ const ChatbotDialog = ({ open, onClose }) => {
       </DialogContent>
     </Dialog>
   );
+};
+
+ChatbotDialog.propTypes = {
+  open: PropTypes.bool.isRequired, // Add prop validation
+  onClose: PropTypes.func.isRequired,
 };
 
 export default ChatbotDialog;

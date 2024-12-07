@@ -27,8 +27,9 @@ import Scrollbar from 'src/components/scrollbar';
 import { varHover } from 'src/components/animate';
 // Redux
 import { useDispatch, useSelector } from 'react-redux';
-import { markAsRead, fetchNotifications } from '../../../../src/app/store/slices/notificationSlice'; // Adjust path as needed
+// Adjust path as needed
 import NotificationItem from './notification-item';
+import { fetchNotifications, markAsRead } from '../../../app/store/slices/notificationSlice';
 
 const TABS = [
   { value: 'all', label: 'All' },

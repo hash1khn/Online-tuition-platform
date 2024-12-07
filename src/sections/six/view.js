@@ -58,7 +58,8 @@ const aims = [
   },
   {
     title: 'Global Reach',
-    description: 'Making quality education accessible globally, bridging gaps and fostering learning.',
+    description:
+      'Making quality education accessible globally, bridging gaps and fostering learning.',
     icon: <PublicIcon fontSize="large" />,
   },
 ];
@@ -82,8 +83,8 @@ export default function MeetTheDevs() {
           <Grid item xs={12} md={7}>
             <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
               Tutorly connects students of all ages with expert tutors for personalized, one-on-one
-              learning sessions. Whether you're looking for flexible tutoring schedules or tailored
-              academic guidance, Tutorly is here to make learning seamless and effective.
+              learning sessions. Whether you&apos;re looking for flexible tutoring schedules or
+              tailored academic guidance, Tutorly is here to make learning seamless and effective.
             </Typography>
           </Grid>
         </Grid>
@@ -99,9 +100,9 @@ export default function MeetTheDevs() {
               The Problem
             </Typography>
             <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-              Many students face challenges in finding qualified tutors who fit their unique academic
-              needs. Platforms often fail to provide the personalization and flexibility required to
-              connect the right tutors with the right students.
+              Many students face challenges in finding qualified tutors who fit their unique
+              academic needs. Platforms often fail to provide the personalization and flexibility
+              required to connect the right tutors with the right students.
             </Typography>
           </Grid>
           {/* Solution */}
@@ -110,9 +111,10 @@ export default function MeetTheDevs() {
               Our Solution
             </Typography>
             <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-              Tutorly redefines the tutoring experience by offering a seamless, user-friendly platform
-              that prioritizes personalized academic journeys. With flexible scheduling, expert
-              guidance, and tailored lesson plans, Tutorly ensures both students and tutors thrive.
+              Tutorly redefines the tutoring experience by offering a seamless, user-friendly
+              platform that prioritizes personalized academic journeys. With flexible scheduling,
+              expert guidance, and tailored lesson plans, Tutorly ensures both students and tutors
+              thrive.
             </Typography>
           </Grid>
         </Grid>
@@ -121,7 +123,12 @@ export default function MeetTheDevs() {
       {/* Our Aims Section */}
       <Divider sx={{ my: 6 }} />
       <Box sx={{ py: 6 }}>
-        <Typography variant="h4" fontWeight="bold" color="primary.main" sx={{ mb: 4, textAlign: 'center' }}>
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          color="primary.main"
+          sx={{ mb: 4, textAlign: 'center' }}
+        >
           Our Aim
         </Typography>
         <Grid container spacing={5} justifyContent="center">
@@ -143,8 +150,8 @@ export default function MeetTheDevs() {
                 <Avatar
                   sx={{
                     bgcolor: 'transparent',
-                    border: '2px solid', 
-                    color: 'primary.main', 
+                    border: '2px solid',
+                    color: 'primary.main',
                     width: 50,
                     height: 50,
                     mx: 'auto',

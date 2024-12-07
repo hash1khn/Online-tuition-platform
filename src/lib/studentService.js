@@ -8,11 +8,13 @@ export const addStudentSubjects = async (student_id, subjectIds) => {
         RETURNING *;
     `;
 
-    const insertedSubjects = [];
-    for (const subject_id of subjectIds) {
-        const { rows } = await query(text, [student_id, subject_id]);
-        insertedSubjects.push(rows[0]);
-    }
+    // Use Promise.all to insert subjects concurrently
+    const insertedSubjects = await Promise.all(
+        subjectIds.map(async (subject_id) => {
+            const { rows } = await query(text, [student_id, subject_id]);
+            return rows[0];
+        })
+    );
 
     return insertedSubjects;
 };
@@ -32,15 +34,17 @@ export const updateStudentSubjects = async (student_id, subjectIds) => {
     // Delete existing subjects
     await query(deleteQuery, [student_id]);
 
-    // Insert new subjects
-    const insertedSubjects = [];
-    for (const subject_id of subjectIds) {
-        const { rows } = await query(insertQuery, [student_id, subject_id]);
-        insertedSubjects.push(rows[0]);
-    }
+    // Insert new subjects concurrently
+    const insertedSubjects = await Promise.all(
+        subjectIds.map(async (subject_id) => {
+            const { rows } = await query(insertQuery, [student_id, subject_id]);
+            return rows[0];
+        })
+    );
 
     return insertedSubjects;
 };
+
 
 // Fetch student with subjects
 export const getStudentWithSubjects = async (student_id) => {

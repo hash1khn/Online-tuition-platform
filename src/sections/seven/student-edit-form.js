@@ -133,8 +133,8 @@ export default function StudentEditForm({ currentStudent }) {
     // Fetch sub-domains based on the selected domain
     try {
       const response = await fetch('/api/grade-levels');
-      const gradeLevels = await response.json();
-      const filteredSubDomains = gradeLevels
+      const gradeLevelsFetch = await response.json();
+      const filteredSubDomains = gradeLevelsFetch
         .filter((grade) => grade.domain === selectedDomain)
         .map((grade) => grade.sub_level);
       setSubDomains(filteredSubDomains);

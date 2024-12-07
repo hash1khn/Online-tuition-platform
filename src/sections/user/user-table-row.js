@@ -1,30 +1,39 @@
+// Standard imports
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-// @mui
-import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
-import Tooltip from '@mui/material/Tooltip';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
-import ListItemText from '@mui/material/ListItemText';
-import { useEffect, useState } from 'react';
-// MUI Icons
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import DoNotDisturbOnOutlinedIcon from '@mui/icons-material/DoNotDisturbOnOutlined';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
-// hooks
-import { useBoolean } from 'src/hooks/use-boolean';
-// components
+
+// MUI imports
+import {
+  Avatar,
+  Button,
+  TableCell,
+  TableRow,
+  Tooltip,
+  ListItemText,
+} from '@mui/material';
+
+// MUI icons
+import {
+  CheckCircleOutlineIcon,
+  CancelOutlinedIcon,
+} from '@mui/icons-material';
+
+// Hooks
+import { useDispatch } from 'react-redux';
+import { useAuthContext } from 'src/auth/hooks';
+
+// Utilities
+import getStripe from 'src/utils/get-stripe';
+
+// Components
 import Label from 'src/components/label';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import ReviewForm from 'src/sections/five/review-form';
-import { useAuthContext } from 'src/auth/hooks';
-import { useDispatch } from 'react-redux';
-import getStripe from "src/utils/get-stripe";
 
-import { updateContractStatus,updateContractStatusToRejected } from 'src/app/store/slices/contractSlice'; // Assuming you have a proper path for the slice
-
-import { View403 } from 'src/sections/error';
+// Actions
+import { updateContractStatus, updateContractStatusToRejected } from 'src/app/store/slices/contractSlice';
 import { createReview } from 'src/app/store/slices/reviewSlice';
+
 
 export default function UserTableRow({ row, selected }) {
   const {
@@ -81,8 +90,8 @@ export default function UserTableRow({ row, selected }) {
     handleCloseReviewDialog();
   };
    // New Payment Gateway Function
-   const handlePayNow = async (contract_id, total_price) => {
-    console.log('Handle Pay Now triggered', contract_id, total_price); // Check if this is logged
+   const handlePayNow = async (payContractId, payTotalPrice) => {
+    console.log('Handle Pay Now triggered', payContractId, payTotalPrice); // Check if this is logged
 
     try {
       // Send the total price to the backend to create the checkout session
@@ -92,8 +101,7 @@ export default function UserTableRow({ row, selected }) {
           'Content-Type': 'application/json', // Ensure you send JSON data
         },
         body: JSON.stringify({
-          amount: total_price, // Send the total price here
-          contract_id: contract_id, // Send the contract_id to associate with the payment
+          amount: payTotalPrice, // Send the total price here// Send the contract_id to associate with the payment
         }),
       });
   
@@ -114,11 +122,11 @@ export default function UserTableRow({ row, selected }) {
         console.warn(error.message);
       } else {
         // After successful payment, update the contract status to "active"
-        const response = await fetch(`/api/contracts/${contract_id}/activate`, {
+        const response = await fetch(`/api/contracts/${payContractId}/activate`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`, // Pass the authorization token if needed
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Pass the authorization token if needed
           },
         });
   

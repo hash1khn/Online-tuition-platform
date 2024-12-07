@@ -13,7 +13,6 @@ import { useTheme } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTeacherAvailability } from 'src/app/store/slices/availabilityslice';
 import dayjs from 'dayjs';
-import UserCardListBySubject from './user-card-profile-home';
 
 // Icons
 import SchoolIcon from '@mui/icons-material/School';
@@ -22,6 +21,10 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import BookIcon from '@mui/icons-material/Book';
 import LanguageIcon from '@mui/icons-material/Language';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+
+// Local imports
+import UserCardListBySubject from './user-card-profile-home';
+
 
 export default function ProfileHome({ info, teacher_id, posts }) {
   const theme = useTheme();

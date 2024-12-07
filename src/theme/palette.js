@@ -38,12 +38,13 @@ const SECONDARY = {
 const INFO = {
   lighter: '#CAFDF5',
   light: '#61F3F3',
-  //main: '#2C3E50',
+  // main: '#2C3E50', // Properly spaced comment
   main: '#8c701c',
   dark: '#006C9C',
   darker: '#003768',
   contrastText: '#FFFFFF',
 };
+
 
 const SUCCESS = {
   lighter: '#D3FCD2',
