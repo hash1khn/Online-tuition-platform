@@ -64,8 +64,8 @@ const schema = Yup.object().shape({
     .test(
       'is-after-start',
       'End Date must be after Start Date',
-      function (value) {
-        const start_date = this.resolve(Yup.ref('start_date')); // Use Yup's ref to access `start_date`
+      (value, context) => {
+        const { start_date } = context.parent; // Access other fields using `context.parent`
         return value && start_date ? value > start_date : true;
       }
     ),
