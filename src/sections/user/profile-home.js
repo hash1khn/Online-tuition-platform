@@ -1,7 +1,7 @@
 'use client';
 
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTeacherAvailability } from 'src/app/store/slices/availabilityslice';
+import { fetchReviews, createReview } from 'src/app/store/slices/reviewSlice';
 import dayjs from 'dayjs';
 
 // Icons
@@ -19,21 +20,30 @@ import SchoolIcon from '@mui/icons-material/School';
 import InfoIcon from '@mui/icons-material/Info';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import BookIcon from '@mui/icons-material/Book';
+import { Avatar, Divider } from '@mui/material';
+import StarIcon from '@mui/icons-material/Star';
 import LanguageIcon from '@mui/icons-material/Language';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import { format } from 'date-fns';
 
 // Local imports
 import UserCardListBySubject from './user-card-profile-home';
 
-
 export default function ProfileHome({ info, teacher_id, posts }) {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { availability, loading, error } = useSelector((state) => state.availability);
 
+  // Get data from Redux store
+  const { availability, loading: availabilityLoading, error: availabilityError } = useSelector((state) => state.availability);
+  const { review, loading: reviewLoading, error: reviewError } = useSelector((state) => state.reviews);
+
+  const [newReview, setNewReview] = useState(''); // Manage new review input
+
+  // Fetch reviews and teacher availability when the component mounts
   useEffect(() => {
     if (teacher_id) {
-      dispatch(getTeacherAvailability(teacher_id));
+      dispatch(fetchReviews(teacher_id)); // Fetch reviews for the specific teacher
+      dispatch(getTeacherAvailability(teacher_id)); // Fetch teacher's availability
     }
   }, [dispatch, teacher_id]);
 
@@ -109,23 +119,48 @@ export default function ProfileHome({ info, teacher_id, posts }) {
   );
   const renderReview = (
     <Card>
-      <CardHeader title={sectionTitle(<SchoolIcon />, 'Biography & Education')} />
+      <CardHeader title="Student Reviews" />
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Box sx={{ typography: 'body1' }}>
-          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 800 }}>
-            Bio:
-          </Typography>{' '}
-          {info.bio || 'No bio available'}
-        </Box>
-        <Box sx={{ typography: 'body1' }}>
-          <Typography component="span" variant="subtitle1" sx={{ fontWeight: 800 }}>
-            Education:
-          </Typography>{' '}
-          {info.education || 'No education available'}
-        </Box>
+        {reviewLoading && (
+          <Typography variant="body2" color="text.secondary">Loading reviews...</Typography>
+        )}
+        {reviewError && !reviewLoading && (
+          <Typography variant="body2" color="text.secondary">Failed to load reviews: {reviewError}</Typography>
+        )}
+        {!reviewLoading && !reviewError && review && review.length > 0 && (
+          review.map((item, index) => (
+            <Box key={index}>
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <Avatar src={item.student_profile_picture || ''} alt={item.student_name || 'Student'} />
+                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                  {item.student_name || 'Anonymous'}
+                </Typography>
+              </Stack>
+              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                {item.rating > 0 &&
+                  [...Array(item.rating)].map((_, i) => (
+                    <StarIcon key={i} sx={{ color: '#FFD700' }} />
+                  ))}
+              </Box>
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                {item.review_text || 'No review text provided.'}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
+                {item.created_at ? format(new Date(item.created_at), 'dd MMM yyyy') : 'No date available'}
+              </Typography>
+              {index < review.length - 1 && <Divider sx={{ my: 2 }} />}
+            </Box>
+          ))
+        )}
+        {!reviewLoading && !reviewError && (!review || review.length === 0) && (
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            No reviews available.
+          </Typography>
+        )}
       </Stack>
     </Card>
   );
+  
 
   const renderSessionDetails = (
     <Card sx={{ p: 3 }}>
@@ -175,13 +210,7 @@ export default function ProfileHome({ info, teacher_id, posts }) {
   );
 
   const renderAvailability = () => {
-    if (loading) {
-      return <Typography variant="body2" color="text.secondary">Loading availability...</Typography>;
-    }
   
-    if (error) {
-      return <Typography variant="body2" color="text.secondary">Failed to load availability.</Typography>;
-    }
   
     const availabilityData = Array.isArray(availability) ? availability : [];
   
@@ -246,11 +275,12 @@ export default function ProfileHome({ info, teacher_id, posts }) {
         <Stack spacing={3}>
           {renderSubjects}
           {renderLanguages}
+         
         </Stack>
       </Grid>
       <Grid xs={12}>{renderBio}</Grid>
       <Grid xs={12}>{renderAvailability()}</Grid>
-      {/* <Grid xs={12}>{renderReview}</Grid> */}
+      <Grid xs={12}>{renderReview}</Grid>
 
       <Grid xs={12}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>

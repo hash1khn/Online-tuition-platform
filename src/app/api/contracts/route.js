@@ -156,6 +156,7 @@ export async function GET(req) {
         LEFT JOIN subjects s ON cs.subject_id = s.subject_id
         LEFT JOIN students st ON hc.student_id = st.student_id
         LEFT JOIN users u ON st.user_id = u.user_id
+        LEFT JOIN teachers t ON hc.teacher_id = t.teacher_id
         WHERE hc.teacher_id = $1 ${status ? 'AND hc.status = $2' : ''} 
         GROUP BY hc.contract_id, u.profile_picture, t.hourly_rate
       `;
@@ -191,19 +192,20 @@ export async function GET(req) {
 }
 
 
-export async function PUT(req) {
-  try {
-    const { contract_id, status } = await req.json();
-    const updatedContract = await updateContractStatus(contract_id, status);
-    return new Response(JSON.stringify(updatedContract), { status: 200 });
-  } catch (error) {
-    console.error('Error updating contract:', error);
-    return new Response(
-      JSON.stringify({ message: 'Failed to update contract', error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-}
+
+// export async function PUT(req) {
+//   try {
+//     const { contract_id, status } = await req.json();
+//     const updatedContract = await updateContractStatus(contract_id, status);
+//     return new Response(JSON.stringify(updatedContract), { status: 200 });
+//   } catch (error) {
+//     console.error('Error updating contract:', error);
+//     return new Response(
+//       JSON.stringify({ message: 'Failed to update contract', error: 'Internal server error' }),
+//       { status: 500, headers: { 'Content-Type': 'application/json' } }
+//     );
+//   }
+// }
 
 export async function DELETE(req) {
   try {
