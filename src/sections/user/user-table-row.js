@@ -236,12 +236,12 @@ export default function UserTableRow({ row, selected }) {
     <>
       <Button
         variant="text" // Soft variant simulation
-        color="primary"
         size="small"
         sx={{
-          backgroundColor: 'rgba(0, 0, 255, 0.1)', // Light blue background for softness
+          color: "rgb(119, 237, 139)",
+          backgroundColor: 'rgba(34, 197, 94, 0.16)', 
           '&:hover': {
-            backgroundColor: 'rgba(0, 0, 255, 0.2)',
+            backgroundColor: '#1f2b37',
           },
         }}
         onClick={handleApprove}
@@ -250,13 +250,14 @@ export default function UserTableRow({ row, selected }) {
       </Button>
       <Button
         variant="text"
-        color="primary"
         size="small"
         sx={{
-          backgroundColor: 'rgba(255, 0, 0, 0.1)', // Light red background
+          color: 'rgb(255, 172, 130)',
+          backgroundColor: 'rgba(255, 86, 48, 0.16)', 
           '&:hover': {
             backgroundColor: 'rgba(255, 0, 0, 0.2)',
           },
+          ml: 1,
         }}
         onClick={handleReject}
       >

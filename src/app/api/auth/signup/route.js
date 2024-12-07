@@ -1,8 +1,8 @@
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 import { hashPassword } from '../../../../lib/auth';
 import { query } from '../../../../lib/db';
 import { createUser } from '../../../../lib/userService';
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -80,17 +80,37 @@ async function sendThankYouEmail(email, name) {
   const mailOptions = {
     from: '"Tutorly.pk" <pk.tutorly@gmail.com>', // Sender address
     to: email, // Receiver's email
-    subject: 'Welcome to Tutorly.pk!', // Subject line
-    text: `Hi ${name},\n\nWelcome to Tutorly.pk - your personalized learning platform!\n\nWe're thrilled to have you onboard. Tutorly.pk connects you with expert tutors to help you achieve your learning goals. Start exploring today and take the next step in your educational journey.\n\nIf you have any questions, feel free to reach out to us at support@tutorly.pk.\n\nHappy Learning!\n\nThe Tutorly.pk Team`, // Plain text body
+    subject: 'Welcome to Tutorly.pk!', // Dynamic subject based on role
+    text: `
+  Hi ${name},
+  
+  Welcome to Tutorly.pk - your personalized ${role === 'teacher' ? 'teaching' : 'learning'} platform!
+  
+  ${role === 'teacher' ? `
+  We're excited to have you join our community of expert tutors. With Tutorly.pk, you can share your knowledge, connect with eager students, and make a meaningful impact. Start setting up your profile and creating your first session today!
+  ` : `
+  We're thrilled to have you onboard. Tutorly.pk connects you with expert tutors to help you achieve your learning goals. Explore the platform and begin your journey to success today!
+  `}
+  
+  If you have any questions, feel free to reach out to us at support@tutorly.pk.
+  
+  Best Regards,
+  The Tutorly.pk Team
+    `.trim(), // Dynamic plain text body
     html: `
       <p>Hi ${name},</p>
-      <p>Welcome to <strong>Tutorly.pk</strong> - your personalized learning platform!</p>
-      <p>We're thrilled to have you onboard. Tutorly.pk connects you with expert tutors to help you achieve your learning goals. Start exploring today and take the next step in your educational journey.</p>
+      <p>Welcome to <strong>Tutorly.pk</strong> - your personalized ${role === 'teacher' ? 'teaching' : 'learning'} platform!</p>
+      ${role === 'teacher' ? `
+      <p>We're excited to have you join our community of expert tutors. With Tutorly.pk, you can share your knowledge, connect with eager students, and make a meaningful impact. Start setting up your profile and creating your first session today!</p>
+      ` : `
+      <p>We're thrilled to have you onboard. Tutorly.pk connects you with expert tutors to help you achieve your learning goals. Explore the platform and begin your journey to success today!</p>
+      `}
       <p>If you have any questions, feel free to reach out to us at <a href="mailto:support@tutorly.pk">support@tutorly.pk</a>.</p>
-      <p>Happy Learning!</p>
+      <p>Best Regards,</p>
       <p><strong>The Tutorly.pk Team</strong></p>
-    `, // HTML body
+    `.trim(), // Dynamic HTML body
   };
   
   await transporter.sendMail(mailOptions);
+  
 }  
