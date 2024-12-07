@@ -49,10 +49,12 @@ const ChatbotDialog = ({ open, onClose }) => {
       const decoder = new TextDecoder();
 
       await reader.read().then(function processText({ done, value }) {
-        if (done) return;
-
+        if (done) {
+          return Promise.resolve(); // Explicitly return a resolved Promise
+        }
+      
         const text = decoder.decode(value || new Uint8Array(), { stream: true });
-
+      
         try {
           const jsonResponse = JSON.parse(text);
           if (jsonResponse.data) {
@@ -65,9 +67,9 @@ const ChatbotDialog = ({ open, onClose }) => {
         } catch (error) {
           console.error('Error parsing response:', error);
         }
-
-        return reader.read().then(processText);
-      });
+      
+        return reader.read().then(processText); // Consistent return
+      });      
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
