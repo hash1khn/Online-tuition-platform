@@ -65,7 +65,7 @@ const schema = Yup.object().shape({
       'is-after-start',
       'End Date must be after Start Date',
       function (value) {
-        const { start_date } = this.parent; // Access other fields in the form
+        const start_date = this.resolve(Yup.ref('start_date')); // Use Yup's ref to access `start_date`
         return value && start_date ? value > start_date : true;
       }
     ),
@@ -74,6 +74,7 @@ const schema = Yup.object().shape({
     .of(Yup.number().required('Subject is required'))
     .min(1, 'At least one subject must be selected'),
 });
+
 
   const methods = useForm({
     resolver: yupResolver(schema),
