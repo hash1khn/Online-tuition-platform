@@ -104,6 +104,32 @@ export const updateContractStatusToRejected = createAsyncThunk(
   }
 );
 
+export const updateContractStatusToCancelled = createAsyncThunk(
+  'contracts/updateContractStatusToCancelled',
+  async ({ contractId, status }, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`/api/contracts/${contractId}/cancelled`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update contract status to rejected');
+      }
+
+      return { contractId, status }; // Return the contractId and new status
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+
 
 
 // Contract slice
@@ -172,11 +198,29 @@ const contractSlice = createSlice({
         }
         
       })
-
       .addCase(updateContractStatusToRejected.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to update contract status';
+      })
+      .addCase(updateContractStatusToCancelled.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateContractStatusToCancelled.fulfilled, (state, action) => {
+        state.loading = false;
+        const { contractId,status } = action.payload; // Only contractId is returned
+        const contractToUpdate = state.contracts.find(contract => contract.id === contractId);
+        if (contractToUpdate) {
+          contractToUpdate.status = status; // Manually set the status to 'rejected'
+        }
+        
+      })
+
+      .addCase(updateContractStatusToCancelled.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to update contract status';
       });
+      ;
   },
 });
 export const selectContracts = (state) => state.contracts.contracts;

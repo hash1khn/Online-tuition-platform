@@ -29,7 +29,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import ReviewForm from 'src/sections/five/review-form';
 
 // Actions
-import { updateContractStatus, updateContractStatusToRejected } from 'src/app/store/slices/contractSlice';
+import { updateContractStatus, updateContractStatusToRejected,updateContractStatusToCancelled } from 'src/app/store/slices/contractSlice';
 import { createReview } from 'src/app/store/slices/reviewSlice';
 
 
@@ -73,6 +73,10 @@ export default function UserTableRow({ row, selected }) {
   const handleReject = () => {
     dispatch(updateContractStatusToRejected({ contractId: contract_id, status: 'rejected' }));
   };
+  const handleCancel = () => { 
+    dispatch(updateContractStatusToCancelled({ contractId: contract_id, status: 'cancelled' })); 
+  };
+  
 
   const contractId = 26;
   const studentId = 5;
@@ -321,13 +325,13 @@ export default function UserTableRow({ row, selected }) {
         open={confirm.value}
         onClose={confirm.onFalse}
         title="Cancel"
-        content="Are you sure want to cancel?"
+        content="Are you sure want to cancel this contract?"
         action={
           <Button
             variant="contained"
             color="error"
             onClick={() => {
-              // handleCancel(); // Call the handleCancel function
+              handleCancel(); // Call the handleCancel function
               confirm.onFalse(); // Close the dialog
             }}
           >
