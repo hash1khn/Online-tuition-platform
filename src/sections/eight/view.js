@@ -48,27 +48,33 @@ const ChatbotDialog = ({ open, onClose }) => {
   
       await reader.read().then(function processText({ done, value }) {
         if (done) {
-          return;
+          return result; // Return the result explicitly when done
         }
-  
+      
         const text = decoder.decode(value || new Uint8Array(), {
           stream: true,
         });
-  
+      
         try {
           const jsonResponse = JSON.parse(text);
           if (jsonResponse.data) {
             setMessages((prevMessages) => {
               const updatedMessages = [...prevMessages];
-              return [...updatedMessages, { role: 'assistant', content: jsonResponse.data }];
+              updatedMessages.pop(); // Remove the placeholder
+              return [
+                ...updatedMessages,
+                { role: "assistant", content: jsonResponse.data },
+              ];
             });
           }
         } catch (error) {
-          console.error('Error parsing response:', error);
+          console.error("Error parsing response:", error);
         }
-  
+      
+        // Continue reading and processing
         return reader.read().then(processText);
       });
+      
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
