@@ -27,9 +27,11 @@ import Scrollbar from 'src/components/scrollbar';
 import { varHover } from 'src/components/animate';
 // Redux
 import { useDispatch, useSelector } from 'react-redux';
-// Adjust path as needed
 import NotificationItem from './notification-item';
-import { fetchNotifications, markAsRead } from '../../../app/store/slices/notificationSlice';
+import {
+  fetchNotifications,
+  markAllNotificationsAsRead,
+} from '../../../app/store/slices/notificationSlice';
 
 const TABS = [
   { value: 'all', label: 'All' },
@@ -66,11 +68,7 @@ export default function NotificationsPopover() {
   const handleChangeTab = useCallback((_, newValue) => setCurrentTab(newValue), []);
 
   const handleMarkAllAsRead = () => {
-    notifications
-      .filter((notification) => !notification.is_read)
-      .forEach((notification) =>
-        dispatch(markAsRead({ notification_id: notification.notification_id }))
-      );
+    dispatch(markAllNotificationsAsRead()); // Dispatch the thunk
   };
 
   const renderHeader = (
@@ -98,11 +96,18 @@ export default function NotificationsPopover() {
   const renderList = (
     <Scrollbar sx={{ px: 1, py: 2 }}>
       {loading && <Typography sx={{ px: 2 }}>Loading notifications...</Typography>}
-      {error && <Typography sx={{ px: 2, color: 'error.main' }}>Failed to load notifications</Typography>}
+      {error && (
+        <Typography sx={{ px: 2, color: 'error.main' }}>
+          Failed to load notifications
+        </Typography>
+      )}
       {!loading && !error && (
         <List disablePadding>
           {filteredNotifications.map((notification) => (
-            <NotificationItem key={notification.notification_id} notification={notification} />
+            <NotificationItem
+              key={notification.notification_id}
+              notification={notification}
+            />
           ))}
         </List>
       )}
