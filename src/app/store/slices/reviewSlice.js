@@ -5,7 +5,7 @@ export const fetchReviews = createAsyncThunk(
   'review/fetchReviews',
   async (teacherId, { rejectWithValue }) => {
     try {
-      const response = await fetch(`http://localhost:3035/api/reviews/${teacherId}`);
+      const response = await fetch(`/api/reviews/${teacherId}`);
       const data = await response.json();
 
       if (!response.ok) {

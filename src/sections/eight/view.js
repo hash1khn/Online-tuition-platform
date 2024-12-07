@@ -25,62 +25,55 @@ const ChatbotDialog = ({ open, onClose }) => {
 
   const sendMessage = async () => {
     if (!currentMessage.trim()) return;
-  
-    const userPrompt = { prompt: currentMessage };
-  
-    // Add the user's message
-    setMessages((prevMessages) => [...prevMessages, { role: 'user', content: currentMessage }]);
-  
-    setCurrentMessage('');
+
+    console.log('User Message:', currentMessage); 
+
+    // Add the user's message to the chat
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages, { role: 'user', content: currentMessage }];
+      console.log('Updated Messages After Adding User:', updatedMessages); // Debugging
+      return updatedMessages;
+    });
+
+    setCurrentMessage(''); 
     setIsTyping(true);
-  
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userPrompt),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: currentMessage }),
       });
-  
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      const result="";
+
       await reader.read().then(function processText({ done, value }) {
-        if (done) {
-          return result; // Return the result explicitly when done
-        }
-      
-        const text = decoder.decode(value || new Uint8Array(), {
-          stream: true,
-        });
-      
+        if (done) return;
+
+        const text = decoder.decode(value || new Uint8Array(), { stream: true });
+
         try {
           const jsonResponse = JSON.parse(text);
           if (jsonResponse.data) {
             setMessages((prevMessages) => {
-              const updatedMessages = [...prevMessages];
-              updatedMessages.pop(); // Remove the placeholder
-              return [
-                ...updatedMessages,
-                { role: "assistant", content: jsonResponse.data },
-              ];
+              const updatedMessages = [...prevMessages, { role: 'assistant', content: jsonResponse.data }];
+              console.log('Updated Messages After Adding Assistant:', updatedMessages); // Debugging
+              return updatedMessages;
             });
           }
         } catch (error) {
-          console.error("Error parsing response:", error);
+          console.error('Error parsing response:', error);
         }
-      
-        // Continue reading and processing
+
         return reader.read().then(processText);
       });
-      
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
       setIsTyping(false);
     }
-  };  
+  };
 
   return (
     <Dialog
