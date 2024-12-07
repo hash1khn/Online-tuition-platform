@@ -49,7 +49,7 @@ export async function POST(req) {
     });
 
     // Send a "Thank You for Signing Up" email
-    await sendThankYouEmail(email, name);
+    await sendThankYouEmail(email, name,role);
 
     // Respond with success and the newly created user data
     return new Response(
@@ -66,7 +66,7 @@ export async function POST(req) {
 }
 
 // Function to send a thank-you email
-async function sendThankYouEmail(email, name) {
+async function sendThankYouEmail(email, name,role) {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
