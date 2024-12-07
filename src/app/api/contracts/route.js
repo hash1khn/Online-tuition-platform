@@ -128,7 +128,7 @@ export async function GET(req) {
       const values = status ? [studentId, status] : [studentId];
       const { rows } = await query(queryText, values);
 
-      const result = rows.map(contract => {
+      const result = rows.map((contract) => {
         const startDate = new Date(contract.start_date);
         const endDate = new Date(contract.end_date);
         const hours = Math.abs(endDate - startDate) / 36e5; // Convert ms to hours
@@ -141,7 +141,9 @@ export async function GET(req) {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
-    } else if (teacherResult.rows.length > 0) {
+    }
+
+    if (teacherResult.rows.length > 0) {
       const teacherId = teacherResult.rows[0].teacher_id;
 
       const queryText = `
@@ -160,7 +162,7 @@ export async function GET(req) {
       const values = status ? [teacherId, status] : [teacherId];
       const { rows } = await query(queryText, values);
 
-      const result = rows.map(contract => {
+      const result = rows.map((contract) => {
         const startDate = new Date(contract.start_date);
         const endDate = new Date(contract.end_date);
         const hours = Math.abs(endDate - startDate) / 36e5;
@@ -173,12 +175,12 @@ export async function GET(req) {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
-    } else {
-      return new Response(
-        JSON.stringify({ message: 'User is neither a student nor a teacher' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
     }
+
+    return new Response(
+      JSON.stringify({ message: 'User is neither a student nor a teacher' }),
+      { status: 404, headers: { 'Content-Type': 'application/json' } }
+    );
   } catch (error) {
     console.error('Error fetching contracts:', error);
     return new Response(
@@ -187,6 +189,7 @@ export async function GET(req) {
     );
   }
 }
+
 
 export async function PUT(req) {
   try {

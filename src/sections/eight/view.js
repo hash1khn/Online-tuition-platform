@@ -43,7 +43,7 @@ const ChatbotDialog = ({ open, onClose }) => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
-      let result = ""; // Use const here as ESLint prefers immutability
+      const result = ""; // Use const here as ESLint prefers immutability
       await reader.read().then(function processText({ done, value }) {
         if (done) {
           return result;
