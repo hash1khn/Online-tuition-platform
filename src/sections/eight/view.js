@@ -3,11 +3,15 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  Button,
+  IconButton,
   Box,
   Stack,
   TextField,
+  Typography,
+  Avatar,
+  CircularProgress,
 } from "@mui/material";
+import { Send, SmartToy } from "@mui/icons-material";
 import PropTypes from "prop-types";
 
 const ChatbotDialog = ({ open, onClose }) => {
@@ -17,7 +21,8 @@ const ChatbotDialog = ({ open, onClose }) => {
       content: "Need Assistance? Just Ask!...",
     },
   ]);
-  const [currentMessage, setCurrentMessage] = useState(""); // Renamed to avoid shadowing
+  const [currentMessage, setCurrentMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
   const sendMessage = async () => {
     if (!currentMessage.trim()) return;
@@ -31,6 +36,12 @@ const ChatbotDialog = ({ open, onClose }) => {
 
     setCurrentMessage("");
 
+    setIsTyping(true);
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { role: "assistant", content: "..." }, 
+    ]);
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -43,7 +54,7 @@ const ChatbotDialog = ({ open, onClose }) => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
-      const result = ""; // Use const here as ESLint prefers immutability
+      let result = "";
       await reader.read().then(function processText({ done, value }) {
         if (done) {
           return result;
@@ -55,10 +66,14 @@ const ChatbotDialog = ({ open, onClose }) => {
         try {
           const jsonResponse = JSON.parse(text);
           if (jsonResponse.data) {
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              { role: "assistant", content: jsonResponse.data },
-            ]);
+            setMessages((prevMessages) => {
+              const updatedMessages = [...prevMessages];
+              updatedMessages.pop();
+              return [
+                ...updatedMessages,
+                { role: "assistant", content: jsonResponse.data },
+              ];
+            });
           }
         } catch (error) {
           console.error("Error parsing response:", error);
@@ -68,92 +83,111 @@ const ChatbotDialog = ({ open, onClose }) => {
       });
     } catch (error) {
       console.error("Error sending message:", error);
+    } finally {
+      setIsTyping(false);
     }
-  };
-
-  // Function to clear messages
-  const clearMessages = () => {
-    setMessages([
-      {
-        role: "assistant",
-        content: "Need Assistance? Just Ask!...",
-      },
-    ]);
   };
 
   return (
     <Dialog open={open} maxWidth="md" fullWidth onClose={onClose}>
       <DialogTitle>Chat with Tutorly&apos;s Assistant</DialogTitle>
-      <DialogContent>
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <Stack
-            direction="column"
-            width="100%"
-            height="400px"
-            border="1px solid black"
-            borderRadius="10px"
-            p={2}
-            spacing={2}
-          >
-            <Stack
-              direction="column"
-              spacing={1}
-              flexGrow={1}
-              overflow="auto"
-              maxHeight="100%"
+      <DialogContent sx={{ p: 2, display: "flex", flexDirection: "column" }}>
+        <Stack
+          direction="column"
+          spacing={2}
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+            maxHeight: 400,
+            p: 2,
+            border: "1px solid black",
+            borderRadius: "10px",
+          }}
+        >
+          {messages.map((msg, index) => (
+            <Box
+              key={index}
+              display="flex"
+              justifyContent={
+                msg.role === "assistant" ? "flex-start" : "flex-end"
+              }
+              alignItems="center"
+              sx={{ width: "100%" }}
             >
-              {messages.map((msg, index) => (
-                <Box
-                  key={index}
-                  display="flex"
-                  justifyContent={
-                    msg.role === "assistant" ? "flex-start" : "flex-end"
-                  }
+              {msg.role === "assistant" && (
+                <Avatar
+                  sx={{
+                    bgcolor: "primary.main",
+                    color: "white",
+                    width: 32,
+                    height: 32,
+                    mr: 1,
+                  }}
                 >
-                  <Box
-                    bgcolor={msg.role === "assistant" ? "primary.main" : "info.main"}
-                    color={msg.role === "assistant" ? "#000000" : "#ffffff"}
-                    borderRadius={12}
-                    p={2}
-                    dangerouslySetInnerHTML={{
-                      __html: msg.content,
-                    }}
-                  />
-                </Box>
-              ))}
-            </Stack>
-          </Stack>
-          <Stack direction="row" spacing={2} mt={2} width="100%">
-            <TextField
-              label="Message"
-              fullWidth
-              value={currentMessage}
-              onChange={(e) => setCurrentMessage(e.target.value)}
-            />
-            <Button variant="contained" onClick={sendMessage}>
-              Send
-            </Button>
-          </Stack>
-          <Stack
-            direction="row"
-            spacing={2}
-            mt={2}
-            width="100%"
-            justifyContent="flex-end"
-            mb={2}
+                  <SmartToy fontSize="small" />
+                </Avatar>
+              )}
+              <Typography
+                variant="body1"
+                sx={{
+                  bgcolor: msg.role === "assistant" ? "primary.main" : "info.main",
+                  color: msg.role === "assistant" ? "#000000" : "#ffffff",
+                  px: 2,
+                  py: 1,
+                  borderRadius: 2,
+                  maxWidth: "70%",
+                  wordBreak: "break-word",
+                }}
+              >
+                {msg.content}
+              </Typography>
+            </Box>
+          ))}
+          {isTyping && (
+            <Box
+              display="flex"
+              alignItems="center"
+              sx={{ width: "100%", mt: 1 }}
+            >
+              <Avatar
+                sx={{
+                  bgcolor: "primary.main",
+                  color: "white",
+                  width: 32,
+                  height: 32,
+                  mr: 1,
+                }}
+              >
+                <SmartToy fontSize="small" />
+              </Avatar>
+              <CircularProgress size={24} sx={{ color: "primary.main" }} />
+            </Box>
+          )}
+        </Stack>
+
+        <Stack direction="row" spacing={2} mt={2} alignItems="center">
+          <TextField
+            label="Type your message..."
+            fullWidth
+            value={currentMessage}
+            onChange={(e) => setCurrentMessage(e.target.value)}
+            variant="outlined"
+          />
+          <IconButton
+            color="primary"
+            onClick={sendMessage}
+            sx={{ bgcolor: "primary.main", color: "white" }}
           >
-            <Button variant="outlined" color="info" onClick={clearMessages}>
-              Clear Conversation
-            </Button>
-          </Stack>
-        </Box>
+            <Send />
+          </IconButton>
+        </Stack>
       </DialogContent>
     </Dialog>
   );
 };
 
 ChatbotDialog.propTypes = {
-  open: PropTypes.bool.isRequired, // Add prop validation
+  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
 };
 

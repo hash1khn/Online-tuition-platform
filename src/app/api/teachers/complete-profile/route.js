@@ -4,9 +4,6 @@ import { verifyToken } from '../../../../lib/auth';
 
 export async function POST(req) {
   try {
-    // Begin transaction
-    await query('BEGIN');
-
     // Extract the token
     const token = req.headers.get('Authorization')?.split(' ')[1];
     if (!token) {
@@ -42,23 +39,11 @@ export async function POST(req) {
       duration_per_session,
     } = await req.json();
 
-    // Log the received values for debugging
-    console.log('Received Values:', {
-      user_id: userId,
-      teaching_mode,
-      bio,
-      experience_years,
-      hourly_rate,
-      education,
-      duration_per_session,
-      languages,
-    });
-
     // Insert the teacher profile into the database
     const createTeacherQuery = `
       INSERT INTO teachers (user_id, teaching_mode, bio, experience_years, hourly_rate, education, duration_per_session)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING *;
+      RETURNING teacher_id, user_id;
     `;
     const teacherValues = [
       userId,
@@ -70,27 +55,25 @@ export async function POST(req) {
       duration_per_session,
     ];
     const teacherResult = await query(createTeacherQuery, teacherValues);
-    const newTeacherProfile = teacherResult.rows[0];
+    const newTeacher = teacherResult.rows[0];
+    const teacherId = newTeacher.teacher_id;
 
-    // Insert languages into the `teacher_languages` table concurrently
-    const addLanguageQuery = `
-      INSERT INTO teacher_languages (teacher_id, language_id)
-      VALUES ($1, $2)
-      RETURNING *;
-    `;
-    await Promise.all(
-      languages.map((languageId) =>
-        query(addLanguageQuery, [newTeacherProfile.teacher_id, languageId])
-      )
-    );
+    console.log('New Teacher ID:', teacherId);
 
-    // Commit transaction
-    await query('COMMIT');
+    // Insert languages into the `teacher_languages` table
+    if (languages.length > 0) {
+      const insertLanguagesQuery = `
+        INSERT INTO teacher_languages (teacher_id, language_id)
+        VALUES ${languages.map((_, i) => `($1, $${i + 2})`).join(', ')};
+      `;
+      const languageValues = [teacherId, ...languages];
+      await query(insertLanguagesQuery, languageValues);
+    }
 
     return new Response(
       JSON.stringify({
         message: 'Teacher profile created successfully',
-        teacher: newTeacherProfile,
+        teacher: newTeacher,
       }),
       {
         status: 201,
@@ -98,12 +81,6 @@ export async function POST(req) {
       }
     );
   } catch (error) {
-    // Rollback transaction in case of an error
-    try {
-      await query('ROLLBACK');
-    } catch (rollbackError) {
-      console.error('Rollback failed:', rollbackError);
-    }
     console.error('Error:', error);
     return new Response(
       JSON.stringify({
