@@ -3,22 +3,20 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 // MUI imports
-import {
-  Avatar,
-  Button,
-  TableCell,
-  TableRow,
-  Tooltip,
-  ListItemText,
-} from '@mui/material';
+import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import ListItemText from '@mui/material/ListItemText';
 
 // MUI icons
-import {
-  CheckCircleOutlineIcon,
-  CancelOutlinedIcon,
-} from '@mui/icons-material';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import DoNotDisturbOnOutlinedIcon from '@mui/icons-material/DoNotDisturbOnOutlined';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 
 // Hooks
+import { useBoolean } from 'src/hooks/use-boolean';
 import { useDispatch } from 'react-redux';
 import { useAuthContext } from 'src/auth/hooks';
 
