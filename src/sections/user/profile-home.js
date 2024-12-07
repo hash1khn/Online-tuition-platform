@@ -38,22 +38,24 @@ export default function ProfileHome({ info, teacher_id, posts }) {
   }, [dispatch, teacher_id]);
 
   const sectionColors = {
-    overview: '#ffb000',
-    sessionDetails: ' #bf7a00',
-    subjects: '#bf7a00',
-    languages: '#e0a200',
-    availability: '#bf7a00',
-  };
+    overview: '#A5D6A7',       
+    sessionDetails: '#80CBC4', 
+    subjects: '#FFD27F',       
+    languages: '#FFE0B2',      
+  };  
+  
 
   const dayColors = {
-    Monday: '#e6b200',
-    Tuesday: '#d99c00',
-    Wednesday: '#f0b800',
-    Thursday: '#cc9900',
-    Friday: '#ffb700',
-    Saturday: '#e6a000',
-    Sunday: '#e0a800',
+    Monday: '#FFD27F',     
+    Tuesday: '#FFE082',    
+    Wednesday: '#80CBC4',  
+    Thursday: '#80DEEA',   
+    Friday: '#A5D6A7',     
+    Saturday: '#FFE0B2',   
+    Sunday: '#FFF59D',     
   };
+  
+  
 
   const chipStyle = (backgroundColor) => ({
     backgroundColor,
@@ -76,7 +78,6 @@ export default function ProfileHome({ info, teacher_id, posts }) {
     <Card sx={{ p: 3 }}>
       {sectionTitle(<InfoIcon />, 'Overview')}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-        <Chip label={`ID: ${info.teacher_id || 'Not Available'}`} sx={chipStyle(sectionColors.overview)} />
         <Chip label={`Gender: ${info.gender || 'Not Specified'}`} sx={chipStyle(sectionColors.overview)} />
         <Chip label={`Experience: ${info.experience_years || 0} years`} sx={chipStyle(sectionColors.overview)} />
         <Chip
@@ -174,65 +175,64 @@ export default function ProfileHome({ info, teacher_id, posts }) {
   );
 
   const renderAvailability = () => {
-        if (loading) {
-          return <Typography variant="body2" color="text.secondary">Loading availability...</Typography>;
-        }
-      
-        if (error) {
-          return <Typography variant="body2" color="text.secondary">Failed to load availability.</Typography>;
-        }
-      
-        // Ensure availability is an array before calling .reduce
-        const availabilityData = Array.isArray(availability) ? availability : [];
-      
-        if (availabilityData.length === 0) {
-          return <Typography variant="body2" color="text.secondary">No availability information provided.</Typography>;
-        }
-      
-        // Transform data to group slots by day
-        const groupedAvailability = availabilityData.reduce((acc, slot) => {
-          if (!acc[slot.day]) {
-            acc[slot.day] = [];
-          }
-      
-          // Add today's date to the time string to ensure dayjs can parse it
-          const startTime = `${new Date().toISOString().split('T')[0]}T${slot.start_time}`;
-          const endTime = `${new Date().toISOString().split('T')[0]}T${slot.end_time}`;
-      
-          // Format the times with dayjs
-          const formattedSlot = `${dayjs(startTime).format('hh:mm A')} - ${dayjs(endTime).format('hh:mm A')}`;
-          acc[slot.day].push(formattedSlot);
-          return acc;
-        }, {});
-      
-        return (
-          <Card sx={{ p: 3 }}>
-            {sectionTitle(<EventAvailableIcon />, 'Availability')}
-            <Stack spacing={2}>
-              {Object.entries(groupedAvailability).map(([day, times], index) => (
-                <Box key={index}>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: 700,
-                      mb: 1,
-                      color: theme.palette.mode === 'dark' ? 'white' : 'text.primary',
-                    }}
-                  >
-                    {day}:
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {times.map((time, idx) => (
-                      <Chip key={idx} label={time} sx={chipStyle(sectionColors.availability)} />
-                    ))}
-                  </Box>
-                </Box>
-              ))}
-            </Stack>
-          </Card>
-        );
-      };    
-
+    if (loading) {
+      return <Typography variant="body2" color="text.secondary">Loading availability...</Typography>;
+    }
+  
+    if (error) {
+      return <Typography variant="body2" color="text.secondary">Failed to load availability.</Typography>;
+    }
+  
+    const availabilityData = Array.isArray(availability) ? availability : [];
+  
+    if (availabilityData.length === 0) {
+      return <Typography variant="body2" color="text.secondary">No availability information provided.</Typography>;
+    }
+  
+    const groupedAvailability = availabilityData.reduce((acc, slot) => {
+      if (!acc[slot.day]) {
+        acc[slot.day] = [];
+      }
+  
+      const startTime = `${new Date().toISOString().split('T')[0]}T${slot.start_time}`;
+      const endTime = `${new Date().toISOString().split('T')[0]}T${slot.end_time}`;
+      const formattedSlot = `${dayjs(startTime).format('hh:mm A')} - ${dayjs(endTime).format('hh:mm A')}`;
+      acc[slot.day].push(formattedSlot);
+      return acc;
+    }, {});
+  
+    return (
+      <Card sx={{ p: 3 }}>
+        {sectionTitle(<EventAvailableIcon />, 'Availability')}
+        <Stack spacing={2}>
+          {Object.entries(groupedAvailability).map(([day, times], index) => (
+            <Box key={index}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 700,
+                  mb: 1,
+                  color: theme.palette.mode === 'dark' ? 'white' : 'text.primary',
+                }}
+              >
+                {day}:
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {times.map((time, idx) => (
+                  <Chip
+                    key={idx}
+                    label={time}
+                    sx={chipStyle(dayColors[day] || sectionColors.availability)}
+                  />
+                ))}
+              </Box>
+            </Box>
+          ))}
+        </Stack>
+      </Card>
+    );
+  };
+  
   return (
     <Grid container spacing={3}>
       <Grid xs={12} md={6}>
@@ -250,7 +250,7 @@ export default function ProfileHome({ info, teacher_id, posts }) {
       </Grid>
       <Grid xs={12}>{renderBio}</Grid>
       <Grid xs={12}>{renderAvailability()}</Grid>
-      <Grid xs={12}>{renderReview}</Grid>
+      {/* <Grid xs={12}>{renderReview}</Grid> */}
 
       <Grid xs={12}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>

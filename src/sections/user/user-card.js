@@ -83,7 +83,12 @@ export default function UserCard({ user }) {
           </Typography>
           <Stack direction="row" spacing={1}>
             {grades.map((grade, index) => (
-              <Chip key={index} label={grade} size="small" variant="outlined" />
+              <Chip key={index} label={grade} size="small" variant="outlined"
+              sx={{
+                color: '#81C784',
+                borderColor: '#81C784',
+              }}
+              />
             ))}
           </Stack>
 
@@ -92,7 +97,12 @@ export default function UserCard({ user }) {
           </Typography>
           <Stack direction="row" spacing={1}>
             {subjects.map((subject, index) => (
-              <Chip key={index} label={subject} size="small" color="info" variant="outlined" />
+              <Chip key={index} label={subject} size="small" variant="outlined"
+              sx={{
+                color: '#80CBC4', 
+                borderColor: '#80CBC4', 
+              }}
+              />
             ))}
           </Stack>
         </Stack>

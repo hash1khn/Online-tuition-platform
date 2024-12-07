@@ -53,14 +53,27 @@ const BookSessionDialog = ({ open, onClose, teacher_id }) => {
   }, [teacher_id]);
 
   // Validation schema
-  const schema = Yup.object().shape({
-    start_date: Yup.date().required('Start Date is required'),
-    end_date: Yup.date().required('End Date is required'),
-    mode: Yup.string().required('Mode is required'),
-    subjects: Yup.array()
-      .of(Yup.number().required('Subject is required'))
-      .min(1, 'At least one subject must be selected'),
-  });
+// Validation schema
+const schema = Yup.object().shape({
+  start_date: Yup.date()
+    .required('Start Date is required')
+    .typeError('Invalid date'),
+  end_date: Yup.date()
+    .required('End Date is required')
+    .typeError('Invalid date')
+    .test(
+      'is-after-start',
+      'End Date must be after Start Date',
+      function (value) {
+        const { start_date } = this.parent; // Access other fields in the form
+        return value && start_date ? value > start_date : true;
+      }
+    ),
+  mode: Yup.string().required('Mode is required'),
+  subjects: Yup.array()
+    .of(Yup.number().required('Subject is required'))
+    .min(1, 'At least one subject must be selected'),
+});
 
   const methods = useForm({
     resolver: yupResolver(schema),
