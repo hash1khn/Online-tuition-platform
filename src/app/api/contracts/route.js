@@ -150,6 +150,7 @@ export async function GET(req) {
         SELECT hc.*, 
                t.hourly_rate,
                json_agg(json_build_object('subject_id', cs.subject_id, 'subject_name', s.name)) AS subjects,
+               u.name AS student_name,
                u.profile_picture AS student_profile_picture
         FROM hiring_contracts hc
         LEFT JOIN contract_subjects cs ON hc.contract_id = cs.contract_id
@@ -158,7 +159,7 @@ export async function GET(req) {
         LEFT JOIN users u ON st.user_id = u.user_id
         LEFT JOIN teachers t ON hc.teacher_id = t.teacher_id
         WHERE hc.teacher_id = $1 ${status ? 'AND hc.status = $2' : ''} 
-        GROUP BY hc.contract_id, u.profile_picture, t.hourly_rate
+        GROUP BY hc.contract_id,u.name, u.profile_picture, t.hourly_rate
       `;
       const values = status ? [teacherId, status] : [teacherId];
       const { rows } = await query(queryText, values);

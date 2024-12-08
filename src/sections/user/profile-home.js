@@ -24,6 +24,7 @@ import { Avatar, Divider } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import LanguageIcon from '@mui/icons-material/Language';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 import { format } from 'date-fns';
 
 // Local imports
@@ -117,51 +118,61 @@ export default function ProfileHome({ info, teacher_id, posts }) {
       </Stack>
     </Card>
   );
+
   const renderReview = (
-    <Card>
-      <CardHeader title="Student Reviews" />
-      <Stack spacing={2} sx={{ p: 3 }}>
+    <Card sx={{ boxShadow: 3, borderRadius: 2, overflow: 'hidden' }}>
+      <CardHeader title={sectionTitle(<RateReviewIcon />, 'Student Reviews')} />
+      <Box sx={{ p: 3 }}>
         {reviewLoading && (
-          <Typography variant="body2" color="text.secondary">Loading reviews...</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ ml: 2 }}>Loading reviews...</Typography>
+          </Box>
         )}
         {reviewError && !reviewLoading && (
-          <Typography variant="body2" color="text.secondary">Failed to load reviews: {reviewError}</Typography>
+          <Typography variant="body2" >Failed to load reviews: {reviewError}</Typography>
         )}
         {!reviewLoading && !reviewError && review && review.length > 0 && (
-          review.map((item, index) => (
-            <Box key={index}>
-              <Stack direction="row" alignItems="center" spacing={2}>
-                <Avatar src={item.student_profile_picture || ''} alt={item.student_name || 'Student'} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                  {item.student_name || 'Anonymous'}
-                </Typography>
-              </Stack>
-              <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                {item.rating > 0 &&
-                  [...Array(item.rating)].map((_, i) => (
-                    <StarIcon key={i} sx={{ color: '#FFD700' }} />
-                  ))}
-              </Box>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                {item.review_text || 'No review text provided.'}
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
-                {item.created_at ? format(new Date(item.created_at), 'dd MMM yyyy') : 'No date available'}
-              </Typography>
-              {index < review.length - 1 && <Divider sx={{ my: 2 }} />}
-            </Box>
-          ))
+          <Grid container spacing={3}>
+            {review.map((item, index) => (
+              <Grid item xs={12} sm={6} key={index}>
+                <Box mt={-3}>
+                  <Grid container alignItems="center" spacing={2}>
+                    <Grid item>
+                      <Avatar src={item.student_profile_picture || ''} alt={item.student_name || 'Student'} />
+                    </Grid>
+                    <Grid item xs>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        {item.student_name || 'Anonymous'}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                        {item.rating > 0 &&
+                          [...Array(item.rating)].map((_, i) => (
+                            <StarIcon key={i} sx={{ color: '#FFD700', fontSize: 18 }} />
+                          ))}
+                      </Box>
+                      <Typography variant="body2" sx={{ mt: 2 }}>
+                        {item.review_text || 'No review text provided.'}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
+                        {item.created_at ? format(new Date(item.created_at), 'dd MMM yyyy') : 'No date available'}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                  {index < review.length - 1 && <Divider sx={{ my: 2 }} />}
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
         )}
         {!reviewLoading && !reviewError && (!review || review.length === 0) && (
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             No reviews available.
           </Typography>
         )}
-      </Stack>
+      </Box>
     </Card>
   );
   
-
   const renderSessionDetails = (
     <Card sx={{ p: 3 }}>
       {sectionTitle(<ScheduleIcon />, 'Session Details')}
