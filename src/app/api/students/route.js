@@ -1,6 +1,6 @@
+import { query } from 'src/lib/db';
 import { createStudent, updateStudent, getStudentWithSubjects, addStudentSubjects, updateStudentSubjects } from '../../../lib/studentService';
 import { verifyToken } from '../../../lib/auth';
-import { query } from 'src/lib/db';
 
 // Create a new student with subjects
 export async function POST(req) {
