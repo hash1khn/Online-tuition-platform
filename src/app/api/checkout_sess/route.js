@@ -52,7 +52,7 @@ export async function POST(req) {
           quantity: 1,
         },
       ],
-      success_url: `http://localhost:3035/dashboard/user/list/`, // Customize your success URL
+      success_url: `/dashboard/user/list/`, // Customize your success URL
       cancel_url: `${req.headers.get(
         "origin"
       )}/result?session_id={CHECKOUT_SESSION_ID}`, // Customize your cancel URL

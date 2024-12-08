@@ -1,5 +1,6 @@
 import { createStudent, updateStudent, getStudentWithSubjects, addStudentSubjects, updateStudentSubjects } from '../../../lib/studentService';
 import { verifyToken } from '../../../lib/auth';
+import { query } from 'src/lib/db';
 
 // Create a new student with subjects
 export async function POST(req) {
@@ -76,34 +77,81 @@ export async function PUT(req) {
 // Get a student with subjects
 export async function GET(req) {
     try {
-        const url = new URL(req.url);
-        const student_id = url.searchParams.get('student_id');
-
-        if (!student_id) {
-            return new Response(
-                JSON.stringify({ message: 'Student ID is required' }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } }
-            );
-        }
-
-        const student = await getStudentWithSubjects(student_id);
-
-        if (!student) {
-            return new Response(
-                JSON.stringify({ message: 'Student not found' }),
-                { status: 404, headers: { 'Content-Type': 'application/json' } }
-            );
-        }
-
-        return new Response(JSON.stringify(student), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-        });
-    } catch (error) {
-        console.error('Error fetching student:', error);
+      // Extract the token from Authorization header
+      const token = req.headers.get('Authorization')?.split(' ')[1];
+      if (!token) {
         return new Response(
-            JSON.stringify({ message: 'Failed to fetch student', error: error.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
+          JSON.stringify({ message: 'Unauthorized: No token provided' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
         );
+      }
+  
+      // Verify token and extract user_id
+      const userId = verifyToken(token)?.id;
+      if (!userId) {
+        return new Response(
+          JSON.stringify({ message: 'Unauthorized: Invalid token' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+  
+      // Fetch student_id using user_id
+      const studentQuery = 'SELECT student_id FROM students WHERE user_id = $1';
+      const { rows: studentRows } = await query(studentQuery, [userId]);
+  
+      if (studentRows.length === 0) {
+        return new Response(
+          JSON.stringify({ message: 'Student not found for the given user ID' }),
+          { status: 404, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+  
+      const studentId = studentRows[0].student_id;
+  
+      // Fetch student details, including grade level and subjects
+      const studentDetailsQuery = `
+        SELECT 
+          s.student_id,
+          s.guardian_phone,
+          s.guardian_address,
+          s.guardian_name,
+          gl.domain AS grade_domain,
+          gl.sub_level AS grade_sub_level,
+          JSON_AGG(
+            JSON_BUILD_OBJECT('subject_id', sub.subject_id, 'name', sub.name)
+          ) AS subjects
+        FROM students s
+        LEFT JOIN grade_levels gl ON s.grade_level_id = gl.grade_level_id
+        LEFT JOIN student_subjects ss ON s.student_id = ss.student_id
+        LEFT JOIN subjects sub ON ss.subject_id = sub.subject_id
+        WHERE s.student_id = $1
+        GROUP BY 
+          s.student_id, 
+          s.guardian_phone, 
+          s.guardian_address,
+          s.guardian_name,
+          gl.domain, 
+          gl.sub_level
+      `;
+  
+      const { rows: studentDetails } = await query(studentDetailsQuery, [studentId]);
+  
+      if (studentDetails.length === 0) {
+        return new Response(
+          JSON.stringify({ message: 'No details found for the student' }),
+          { status: 404, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+  
+      return new Response(
+        JSON.stringify({ student: studentDetails[0] }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    } catch (error) {
+      console.error('Error fetching student details:', error);
+      return new Response(
+        JSON.stringify({ message: 'Failed to fetch student details', error: error.message }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
-}
+  }

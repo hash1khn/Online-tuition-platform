@@ -13,6 +13,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import { LoadingScreen } from 'src/components/loading-screen';
+import { useAuthContext } from 'src/auth/hooks';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFUploadAvatar, RHFSelect } from 'src/components/hook-form';
 // Import the fetchCities and selectCities
@@ -33,6 +34,8 @@ export default function UserNewEditForm({ userId }) {
   const cities = useSelector(selectCities); // Get cities from the Redux store
   const [selectedCity, setSelectedCity] = useState('');
   const [isLoading, setIsLoading] = useState(true); 
+  const { user } = useAuthContext();
+  const role = user?.role;
   const [selectedGender, setSelectedGender] = useState('');
   const [isNextLoading, setIsNextLoading] = useState(false);
 
@@ -124,7 +127,12 @@ export default function UserNewEditForm({ userId }) {
       await dispatch(saveUser(payload)).unwrap(); // Use your save user action here
       
       enqueueSnackbar(currentUser ? 'Update success!' : 'Create success!', { variant: 'success' });
-      router.push(paths.dashboard.user.complete);
+      if (role === 'student') {
+        router.push(paths.dashboard.group.seven);
+      } else if (role === 'teacher') {
+        router.push(paths.dashboard.user.complete);
+      }
+      
     } catch (error) {
       console.error(error);
       // enqueueSnackbar('Failed to save user: '+ error.message, { variant: 'error' }); // Notify error
