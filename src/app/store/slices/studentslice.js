@@ -56,7 +56,7 @@ export const updateStudent = createAsyncThunk(
   'student/updateStudent',
   async (updatedData, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/api/students/${updatedData.student_id}`, {
+      const response = await fetch(`/api/students/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

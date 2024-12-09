@@ -99,8 +99,9 @@ export default function StudentEditForm() {
 
     const fetchStudent = async () => {
       try {
-        const result = await dispatch(fetchStudentData(studentState)).unwrap();
+        const result = await dispatch(fetchStudentData()).unwrap();
         if (result) {
+          console.log(result)
           Object.keys(result).forEach((key) => {
             if (methods.getValues(key) !== undefined) {
               setValue(key, result[key]);
@@ -148,6 +149,7 @@ export default function StudentEditForm() {
     };
 
     try {
+      console.log('hello',payload)
       await dispatch(saveStudentData(payload));
       alert('Form submitted successfully!');
     } catch (error) {
@@ -180,11 +182,15 @@ export default function StudentEditForm() {
     setValue('subjects', [...currentSubjects, '']);
   };
   const handleSaveOrUpdate = async (data, action) => {
+    const subjectIds = data.subjects.map(
+      (subjectName) => subjects.find((subject) => subject.name === subjectName)?.subject_id
+    );
     console.log('studentState',studentState)
     setIsNextLoading(true);
   
     const submissionData = {
       ...data,
+      subjects:subjectIds,
     };
 console.log('data',data);
 
@@ -379,16 +385,15 @@ console.log('data',data);
        
       
         <Stack alignItems="flex-end" sx={{ mt: 2 }}>
-          <LoadingButton
-            type="submit"
-            variant="contained"
-            onClick={isFormPopulated ? handleUpdateClick : handleNextClick}
-
-            loading={isNextLoading}
-          >
-            {isFormPopulated ? 'Update' : 'Save'}
-          </LoadingButton>
-        </Stack>
+  <LoadingButton
+    type="submit"
+    variant="contained"
+    onClick={isFormPopulated ? handleSubmit(handleUpdateClick) : handleSubmit(onSubmit)}
+    loading={isNextLoading || isLoading} // Updated to include isLoading state
+  >
+    {isFormPopulated ? 'Update' : 'Save'}
+  </LoadingButton>
+</Stack>
       </Box>
       {/* </Box> */}
     </FormProvider>
