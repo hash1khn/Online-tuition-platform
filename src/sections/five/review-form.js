@@ -4,16 +4,18 @@ import PropTypes from 'prop-types';
 import * as Yup from 'yup';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  TextField, 
-  Typography, 
-  Rating, 
-  Divider, 
-  Button 
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Typography,
+  Rating,
+  Divider,
+  Button,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
 import React, { useState } from 'react';
@@ -22,6 +24,9 @@ import React, { useState } from 'react';
 
 export default function ReviewForm({ onSubmitReview, open, onClose }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   const ReviewSchema = Yup.object().shape({
     rating: Yup.number()
@@ -44,73 +49,99 @@ export default function ReviewForm({ onSubmitReview, open, onClose }) {
   const handleReviewSubmit = async (data) => {
     setIsLoading(true);
 
-    const reviewData = { ...data };
+    try {
+      // Simulate API submission
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    console.log('Submitting Review:', reviewData);
-    if (onSubmitReview) onSubmitReview(reviewData);
+      if (onSubmitReview) onSubmitReview(data);
 
-    setTimeout(() => {
-      setIsLoading(false);
-      alert('Review submitted successfully!');
+      setSnackbarMessage('Review submitted successfully!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+
       onClose(); // Close the dialog on successful submission
-    }, 1500);
+    } catch (error) {
+      setSnackbarMessage('Failed to submit the review.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Submit a Review</DialogTitle>
-      
-      <DialogContent>
-        <form onSubmit={handleSubmit(handleReviewSubmit)}>
-          <Typography variant="h6" gutterBottom>
-            Review Details
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
+    <>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <DialogTitle>Submit a Review</DialogTitle>
 
-          {/* Rating Field */}
-          <Typography sx={{ mb: 1 }}>Rating</Typography>
-          <Controller
-            name="rating"
-            control={control}
-            render={({ field }) => (
-              <Rating {...field} size="large" max={5} precision={0.5} />
-            )}
-          />
-          {errors.rating && (
-            <Typography variant="caption" color="error">
-              {errors.rating.message}
+        <DialogContent>
+          <form onSubmit={handleSubmit(handleReviewSubmit)}>
+            <Typography variant="h6" gutterBottom>
+              Review Details
             </Typography>
-          )}
+            <Divider sx={{ mb: 2 }} />
 
-          {/* Review Text Field */}
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            label="Review"
-            placeholder="Share your experience..."
-            error={!!errors.review_text}
-            helperText={errors.review_text?.message}
-            {...methods.register('review_text')}
-            sx={{ mt: 2 }}
-          />
-        </form>
-      </DialogContent>
+            {/* Rating Field */}
+            <Typography sx={{ mb: 1 }}>Rating</Typography>
+            <Controller
+              name="rating"
+              control={control}
+              render={({ field }) => (
+                <Rating {...field} size="large" max={5} precision={0.5} />
+              )}
+            />
+            {errors.rating && (
+              <Typography variant="caption" color="error">
+                {errors.rating.message}
+              </Typography>
+            )}
 
-      <DialogActions>
-        <Button onClick={onClose} color="inherit">
-          Cancel
-        </Button>
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          loading={isLoading}
-          onClick={handleSubmit(handleReviewSubmit)}
-        >
-          Submit Review
-        </LoadingButton>
-      </DialogActions>
-    </Dialog>
+            {/* Review Text Field */}
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              label="Review"
+              placeholder="Share your experience..."
+              error={!!errors.review_text}
+              helperText={errors.review_text?.message}
+              {...methods.register('review_text')}
+              sx={{ mt: 2 }}
+            />
+          </form>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={onClose} color="inherit">
+            Cancel
+          </Button>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            loading={isLoading}
+            onClick={handleSubmit(handleReviewSubmit)}
+          >
+            Submit Review
+          </LoadingButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
 

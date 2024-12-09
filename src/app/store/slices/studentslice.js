@@ -1,5 +1,30 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+// Async thunk for getting student data
+export const fetchStudentData = createAsyncThunk(
+  'student/fetchStudentData',
+  async (studentId, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`/api/students/${studentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Add authorization if required
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch student data');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 // Async thunk for saving student data
 export const saveStudentData = createAsyncThunk(
   'student/saveStudentData',
@@ -9,7 +34,7 @@ export const saveStudentData = createAsyncThunk(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Add authorization if required
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify(studentData),
       });
@@ -19,7 +44,6 @@ export const saveStudentData = createAsyncThunk(
       }
 
       const data = await response.json();
-      console.log(data)
       return data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -27,17 +51,26 @@ export const saveStudentData = createAsyncThunk(
   }
 );
 
-
 // Async thunk for updating student data
 export const updateStudent = createAsyncThunk(
   'student/updateStudent',
   async (updatedData, { rejectWithValue }) => {
     try {
-      // Simulating an API call
-      const response = await new Promise((resolve) =>
-        setTimeout(() => resolve(updatedData), 1500)
-      );
-      return response;
+      const response = await fetch(`/api/students/${updatedData.student_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update student data');
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -45,13 +78,13 @@ export const updateStudent = createAsyncThunk(
 );
 
 const initialState = {
-  name: '',
-  address: '',
-  phone: '',
-  guardianName: '',
-  guardianPhone: '',
+  student_id: null,
+  guardian_phone: '',
+  guardian_address: '',
+  guardian_name: '',
+  grade_domain: '',
+  grade_sub_level: '',
   subjects: [],
-  grade: '',
   loading: false,
   error: null,
 };
@@ -60,40 +93,41 @@ const studentSlice = createSlice({
   name: 'student',
   initialState,
   reducers: {
-    setName: (state, action) => {
-      state.name = action.payload;
+    setGuardianPhone: (state, action) => {
+      state.guardian_phone = action.payload;
     },
-    setAddress: (state, action) => {
-      state.address = action.payload;
-    },
-    setPhone: (state, action) => {
-      state.phone = action.payload;
+    setGuardianAddress: (state, action) => {
+      state.guardian_address = action.payload;
     },
     setGuardianName: (state, action) => {
-      state.guardianName = action.payload;
+      state.guardian_name = action.payload;
     },
-    setGuardianPhone: (state, action) => {
-      state.guardianPhone = action.payload;
+    setGradeDomain: (state, action) => {
+      state.grade_domain = action.payload;
+    },
+    setGradeSubLevel: (state, action) => {
+      state.grade_sub_level = action.payload;
     },
     setSubjects: (state, action) => {
       state.subjects = action.payload;
     },
-    setGrade: (state, action) => {
-      state.grade = action.payload;
-    },
-    addSubject: (state) => {
-      state.subjects.push('');
-    },
-    removeSubject: (state, action) => {
-      state.subjects.splice(action.payload, 1);
-    },
-    updateSubject: (state, action) => {
-      const { index, value } = action.payload;
-      state.subjects[index] = value;
-    },
   },
   extraReducers: (builder) => {
     builder
+      // Fetch student data reducers
+      .addCase(fetchStudentData.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchStudentData.fulfilled, (state, action) => {
+        state.loading = false;
+        Object.assign(state, action.payload);
+      })
+      .addCase(fetchStudentData.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
       // Save student data reducers
       .addCase(saveStudentData.pending, (state) => {
         state.loading = true;
@@ -124,17 +158,15 @@ const studentSlice = createSlice({
   },
 });
 
+export const selectStudent = (state) => state.student;
+
 export const {
-  setName,
-  setAddress,
-  setPhone,
-  setGuardianName,
   setGuardianPhone,
+  setGuardianAddress,
+  setGuardianName,
+  setGradeDomain,
+  setGradeSubLevel,
   setSubjects,
-  setGrade,
-  addSubject,
-  removeSubject,
-  updateSubject,
 } = studentSlice.actions;
 
 export default studentSlice.reducer;

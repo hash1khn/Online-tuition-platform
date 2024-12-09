@@ -4,11 +4,13 @@ import PropTypes from 'prop-types';
 
 // MUI imports
 import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import ListItemText from '@mui/material/ListItemText';
+import { Typography } from '@mui/material';
 
 // MUI icons
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -29,9 +31,12 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import ReviewForm from 'src/sections/five/review-form';
 
 // Actions
-import { updateContractStatus, updateContractStatusToRejected,updateContractStatusToCancelled } from 'src/app/store/slices/contractSlice';
+import {
+  updateContractStatus,
+  updateContractStatusToRejected,
+  updateContractStatusToCancelled,
+} from 'src/app/store/slices/contractSlice';
 import { createReview } from 'src/app/store/slices/reviewSlice';
-
 
 export default function UserTableRow({ row, selected }) {
   const {
@@ -50,9 +55,8 @@ export default function UserTableRow({ row, selected }) {
     total_price,
   } = row;
 
-
   // useEffect to refresh whenever the contractStatus changes (after dispatch)
- // Dependency array ensures that the effect runs on contractStatus change
+  // Dependency array ensures that the effect runs on contractStatus change
 
   const confirm = useBoolean();
   const [isReviewDialogOpen, setReviewDialogOpen] = useState(false);
@@ -62,10 +66,7 @@ export default function UserTableRow({ row, selected }) {
 
   const handleOpenReviewDialog = () => setReviewDialogOpen(true);
   const handleCloseReviewDialog = () => setReviewDialogOpen(false);
-  useEffect(() => {
-  
-
-  }, [dispatch]); 
+  useEffect(() => {}, [dispatch]);
   const handleApprove = () => {
     dispatch(updateContractStatus({ contractId: contract_id, status: 'approved' }));
   };
@@ -73,26 +74,25 @@ export default function UserTableRow({ row, selected }) {
   const handleReject = () => {
     dispatch(updateContractStatusToRejected({ contractId: contract_id, status: 'rejected' }));
   };
-  const handleCancel = () => { 
-    dispatch(updateContractStatusToCancelled({ contractId: contract_id, status: 'cancelled' })); 
+  const handleCancel = () => {
+    dispatch(updateContractStatusToCancelled({ contractId: contract_id, status: 'cancelled' }));
   };
-  
 
   const contractId = 26;
   const studentId = 5;
   const teacherId = 27;
   const rating = 4;
-  const reviewText = "The teacher was very helpful and explained the concepts clearly. Highly recommend!";
-  
- 
+  const reviewText =
+    'The teacher was very helpful and explained the concepts clearly. Highly recommend!';
+
   const handleSubmitReview = (data) => {
     const updatedData = { ...data, student_id, contract_id, teacher_id };
     console.log('Review Submitted:', updatedData);
     dispatch(createReview(updatedData));
     handleCloseReviewDialog();
   };
-   // New Payment Gateway Function
-   const handlePayNow = async (payContractId, payTotalPrice) => {
+  // New Payment Gateway Function
+  const handlePayNow = async (payContractId, payTotalPrice) => {
     console.log('Handle Pay Now triggered', payContractId, payTotalPrice); // Check if this is logged
 
     try {
@@ -106,20 +106,20 @@ export default function UserTableRow({ row, selected }) {
           amount: payTotalPrice, // Send the total price here// Send the contract_id to associate with the payment
         }),
       });
-  
+
       const checkoutSessionJson = await checkoutSession.json();
-  
+
       if (checkoutSessionJson.statusCode === 500) {
         console.error(checkoutSessionJson.message);
         return;
       }
-  
+
       const stripe = await getStripe(); // You should have a method to get Stripe instance
-  
+
       const { error } = await stripe.redirectToCheckout({
         sessionId: checkoutSessionJson.id,
       });
-  
+
       if (error) {
         console.warn(error.message);
       } else {
@@ -128,12 +128,12 @@ export default function UserTableRow({ row, selected }) {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`, // Pass the authorization token if needed
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`, // Pass the authorization token if needed
           },
         });
-  
+
         const responseJson = await response.json();
-  
+
         if (response.ok) {
           console.log('Contract status updated to active:', responseJson);
         } else {
@@ -144,57 +144,47 @@ export default function UserTableRow({ row, selected }) {
       console.error('Error during payment: ', error);
     }
   };
-  
 
   return (
     <>
       <TableRow hover selected={selected}>
         {/* <TableCell padding="checkbox"> */}
-          {/* <Checkbox checked={selected} onClick={onSelectRow} /> */}
+        {/* <Checkbox checked={selected} onClick={onSelectRow} /> */}
         {/* </TableCell> */}
-        {console.log('student_name',student_name)}
+        {console.log('student_name', student_name)}
 
-        <TableCell >
+        <TableCell>
           {role === 'student' && (
             <Avatar alt={teacher_name} src={teacher_profile_picture} sx={{ mr: 2 }} />
           )}
           {role === 'teacher' && (
             <Avatar alt={teacher_name} src={student_profile_picture} sx={{ mr: 2 }} />
           )}
- </TableCell>
+        </TableCell>
 
-
- <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-           {role === 'teacher'  && (
-          
-          <ListItemText
-           
-            primary={student_name}
-          
-         
-            secondary={email}
-            primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{
-              component: 'span',
-              color: 'text.disabled',
-            }}
-        
-          />
-        )}
-          {role === 'student'  && (
-          <ListItemText
-           
-            primary={teacher_name}
-         
-            secondary={email}
-            primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{
-              component: 'span',
-              color: 'text.disabled',
-            }}
-        
-          />
-        )}
+        <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+          {role === 'teacher' && (
+            <ListItemText
+              primary={student_name}
+              secondary={email}
+              primaryTypographyProps={{ typography: 'body2' }}
+              secondaryTypographyProps={{
+                component: 'span',
+                color: 'text.disabled',
+              }}
+            />
+          )}
+          {role === 'student' && (
+            <ListItemText
+              primary={teacher_name}
+              secondary={email}
+              primaryTypographyProps={{ typography: 'body2' }}
+              secondaryTypographyProps={{
+                component: 'span',
+                color: 'text.disabled',
+              }}
+            />
+          )}
         </TableCell>
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>
@@ -218,102 +208,122 @@ export default function UserTableRow({ row, selected }) {
         </TableCell>
 
         <TableCell>
-  <Label
-    variant="soft"
-    color={
-      (status === 'active' && 'success') ||
-      (status === 'pending' && 'warning') ||
-      (status === 'accepted' && 'primary') ||
-      (status === 'rejected' && 'error') ||
-      (status === 'completed' && 'info') ||
-      (status === 'cancelled' && 'error') ||
-      'default'
-    }
-  >
-    {status}
-  </Label>
-</TableCell>
-
-
-        <TableCell
-  align="center"
-  sx={{
-    textAlign: 'center', // Ensure proper text alignment
-  }}
->
-  {role === 'teacher' && status === 'pending' && (
-    <>
-      <Button
-        variant="text" // Soft variant simulation
-        size="small"
-        sx={{
-          color: "rgb(119, 237, 139)",
-          backgroundColor: 'rgba(34, 197, 94, 0.16)', 
-          '&:hover': {
-            backgroundColor: '#1f2b37',
-          },
-        }}
-        onClick={handleApprove}
-      >
-        Approve
-      </Button>
-      <Button
-        variant="text"
-        size="small"
-        sx={{
-          color: 'rgb(255, 172, 130)',
-          backgroundColor: 'rgba(255, 86, 48, 0.16)', 
-          '&:hover': {
-            backgroundColor: 'rgba(255, 0, 0, 0.2)',
-          },
-          ml: 1,
-        }}
-        onClick={handleReject}
-      >
-        Reject
-      </Button>
-    </>
-  )}
-  {role === 'student' && status === 'active' && (
-    <Button
-      variant="text"
-      color="primary"
-      size="small"
-      sx={{ backgroundColor: 'rgba(255, 215, 0, 0.1)', '&:hover': { backgroundColor: 'rgba(0, 128, 0, 0.2)' } }}
-      onClick={() => {
-        confirm.onTrue();
-      }}
-    >
-      Cancel
-    </Button>
-  )}
-  {role === 'student' && status === 'completed' && (
-    <Button
-      variant="text"
-      color="primary"
-      size="small"
-      sx={{ backgroundColor: 'rgba(255, 215, 0, 0.1)', '&:hover': { backgroundColor: 'rgba(255, 215, 0, 0.2)' } }}
-      onClick={handleOpenReviewDialog}
-    >
-      Add a Review
-    </Button>
-  )}
-{role === 'student' && status === 'accepted' && (
-          <Button
-          variant="text"
-          color="primary"
-          size="small"
-          sx={{
-            backgroundColor: 'rgba(255, 165, 0, 0.1)',
-            '&:hover': { backgroundColor: 'rgba(255, 165, 0, 0.2)' },
-          }}
-          onClick={() => handlePayNow(contract_id, total_price)}// Calling payment function here
-        >
-          Pay now - ${total_price} {/* Displaying the total price */}
-        </Button>
-          )}
+          <Label
+            variant="soft"
+            color={
+              (status === 'active' && 'success') ||
+              (status === 'pending' && 'warning') ||
+              (status === 'accepted' && 'primary') ||
+              (status === 'rejected' && 'error') ||
+              (status === 'completed' && 'info') ||
+              (status === 'cancelled' && 'error') ||
+              'default'
+            }
+          >
+            {status}
+          </Label>
         </TableCell>
 
+        <TableCell
+          align="center"
+          sx={{
+            textAlign: 'center', // Ensure proper text alignment
+          }}
+        >
+          {role === 'teacher' && status === 'pending' && (
+            <Grid container spacing={4} justifyContent="center" alignItems="center">
+              <Grid item xs={12} sm={6} md={3} display="flex" justifyContent="center">
+                <Button
+                  variant="text"
+                  size="small"
+                  sx={{
+                    color: 'rgb(119, 237, 139)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.16)',
+                    '&:hover': {
+                      backgroundColor: '#1f2b37',
+                    },
+                    ml: { xs: 0, sm: -3 },
+                  }}
+                  onClick={handleApprove}
+                >
+                  Approve
+                </Button>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3} display="flex" justifyContent="center">
+                <Button
+                  variant="text"
+                  size="small"
+                  sx={{
+                    color: 'rgb(255, 172, 130)',
+                    backgroundColor: 'rgba(255, 86, 48, 0.16)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 0, 0, 0.2)',
+                    },
+                    ml: { xs: 0, sm: 4 },
+                  }}
+                  onClick={handleReject}
+                >
+                  Reject
+                </Button>
+              </Grid>
+            </Grid>
+          )}
+
+          {role === 'student' && status === 'active' && (
+            <Button
+              variant="text"
+              color="primary"
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                '&:hover': { backgroundColor: 'rgba(0, 128, 0, 0.2)' },
+              }}
+              onClick={() => {
+                confirm.onTrue();
+              }}
+            >
+              Cancel
+            </Button>
+          )}
+          {role === 'student' && status === 'completed' && (
+            <Button
+              variant="text"
+              color="primary"
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                '&:hover': { backgroundColor: 'rgba(255, 215, 0, 0.2)' },
+              }}
+              onClick={handleOpenReviewDialog}
+            >
+              Add a Review
+            </Button>
+          )}
+          {role === 'student' && status === 'accepted' && (
+            <Button
+              variant="text"
+              color="primary"
+              size="small"
+              sx={{
+                backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                '&:hover': { backgroundColor: 'rgba(255, 165, 0, 0.2)' },
+                textTransform: 'none',
+                fontSize: { xs: '0.8rem', sm: '1rem', md: '1.2rem' },
+              }}
+              onClick={() => handlePayNow(contract_id, total_price)}
+            >
+              <Typography
+                sx={{
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Pay now - ${total_price}
+              </Typography>
+            </Button>
+          )}
+        </TableCell>
       </TableRow>
 
       {/* Review Dialog */}

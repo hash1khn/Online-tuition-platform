@@ -21,16 +21,24 @@ import AddOutlined from '@mui/icons-material/AddOutlined';
 import * as Yup from 'yup';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useRouter } from 'src/routes/hooks';
+import { paths } from 'src/routes/paths';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { saveStudentData } from 'src/app/store/slices/studentslice';
+import {
+  saveStudentData,
+  updateStudent,
+  fetchStudentData,
+  selectStudent,
+} from 'src/app/store/slices/studentslice';
+import { enqueueSnackbar } from 'notistack';
 
 // Validation schema
 const StudentSchema = Yup.object().shape({
   domain: Yup.string().required('Domain is required'),
   subDomain: Yup.string().required('Sub-domain is required'),
-  address:Yup.string().required('Address is required'),
+  address: Yup.string().required('Address is required'),
   guardianName: Yup.string().required('Guardian name is required'),
   guardianPhone: Yup.string()
     .required('Guardian phone number is required')
@@ -40,32 +48,40 @@ const StudentSchema = Yup.object().shape({
     .min(1, 'At least one subject must be added'),
 });
 
-export default function StudentEditForm({ currentStudent }) {
+export default function StudentEditForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [domains, setDomains] = useState([]);
+  const router = useRouter();
   const [subDomains, setSubDomains] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [isBackLoading, setIsBackLoading] = useState(false);
   const [gradeLevels, setGradeLevels] = useState([]);
-
+  const studentData = useSelector(selectStudent);
   const dispatch = useDispatch();
-  const studentState = useSelector((state) => state.student);
+  const studentState = useSelector(selectStudent);
+  const [isNextLoading, setIsNextLoading] = useState(false);
 
   const methods = useForm({
     resolver: yupResolver(StudentSchema),
     defaultValues: {
-      domain: currentStudent?.domain || '',
-      subDomain: currentStudent?.subDomain || '',
-      address: currentStudent?.address || '',
-      guardianName: currentStudent?.guardianName || '',
-      guardianPhone: currentStudent?.guardianPhone || '',
-      subjects: currentStudent?.subjects || [],
+      domain: studentState?.grade_domain || '',
+      subDomain: studentState?.grade_sub_level || '',
+      address: studentState?.guardian_address || '',
+      guardianName: studentState?.guardian_name || '',
+      guardianPhone: studentState?.guardian_phone || '',
+      subjects: studentState?.subjects || [],
     },
   });
-
-  const { handleSubmit, control, watch, setValue, formState: { errors } } = methods;
+  const isFormPopulated = studentData && Object.values(studentData).some(field => field !== '' && field !== null);
+  const {
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = methods;
 
   useEffect(() => {
-    // Fetch domains and subjects from backend
     const fetchDomains = async () => {
       try {
         const response = await fetch('/api/grade-levels');
@@ -81,6 +97,21 @@ export default function StudentEditForm({ currentStudent }) {
       }
     };
 
+    const fetchStudent = async () => {
+      try {
+        const result = await dispatch(fetchStudentData(studentState)).unwrap();
+        if (result) {
+          Object.keys(result).forEach((key) => {
+            if (methods.getValues(key) !== undefined) {
+              setValue(key, result[key]);
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch student data:', error);
+      }
+    };
+
     const fetchSubjects = async () => {
       try {
         const response = await fetch('/api/subjects');
@@ -93,44 +124,45 @@ export default function StudentEditForm({ currentStudent }) {
 
     fetchDomains();
     fetchSubjects();
-  }, []);
+    fetchStudent();
+  }, [dispatch, methods, setValue,studentState]);
 
   const onSubmit = async (data) => {
     setIsLoading(true);
 
-    // Map selected subDomain to grade level ID
-    const grade_level_id = gradeLevels.find((grade) => grade.sub_level === data.subDomain)?.grade_level_id;
+    const grade_level_id = gradeLevels.find(
+      (grade) => grade.sub_level === data.subDomain
+    )?.grade_level_id;
 
-    // Map selected subjects to subject IDs
-    const subjectIds = data.subjects.map((subjectName) =>
-      subjects.find((subject) => subject.name === subjectName)?.subject_id
+    const subjectIds = data.subjects.map(
+      (subjectName) =>
+        subjects.find((subject) => subject.name === subjectName)?.subject_id
     );
 
     const payload = {
-      grade_level_id, // Single grade level ID
+      grade_level_id,
       guardian_address: data.address,
       guardian_name: data.guardianName,
       guardian_phone: data.guardianPhone,
-      subjects: subjectIds, // Array of subject IDs
+      subjects: subjectIds,
     };
-  
-    console.log('Payload Submitted:', payload);
 
-    await dispatch(saveStudentData(payload));
-
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await dispatch(saveStudentData(payload));
       alert('Form submitted successfully!');
-    }, 1500);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDomainChange = async (e) => {
     const selectedDomain = e.target.value;
     setValue('domain', selectedDomain);
     setSubDomains([]);
-    setValue('subDomain', ''); // Reset sub-domain when domain changes
+    setValue('subDomain', '');
 
-    // Fetch sub-domains based on the selected domain
     try {
       const response = await fetch('/api/grade-levels');
       const gradeLevelsFetch = await response.json();
@@ -144,23 +176,53 @@ export default function StudentEditForm({ currentStudent }) {
   };
 
   const handleAddSubject = () => {
-    const currentSubjects = watch('subjects');
+    const currentSubjects = watch('subjects') || [];
     setValue('subjects', [...currentSubjects, '']);
   };
+  const handleSaveOrUpdate = async (data, action) => {
+    console.log('studentState',studentState)
+    setIsNextLoading(true);
+  
+    const submissionData = {
+      ...data,
+    };
+console.log('data',data);
+
+
+    try {
+      if (action === 'update') {
+        await dispatch(saveStudentData(submissionData)).unwrap();
+        enqueueSnackbar('Profile updated successfully!', { variant: 'success' });
+
+      } else {
+        await dispatch(saveStudentData(submissionData)).unwrap();
+        enqueueSnackbar('Profile created successfully!', { variant: 'success' });
+      }
+      router.push(paths.dashboard.one);
+    } catch (error) {
+      enqueueSnackbar('Failed to submit form', { variant: 'error' });
+    } finally {
+      setIsNextLoading(false);
+    }
+  };
+
+  const handleNextClick = handleSubmit((data) => handleSaveOrUpdate(data, 'save'));
+  const handleUpdateClick = handleSubmit((data) => handleSaveOrUpdate(data, 'update'));
 
   const handleRemoveSubject = (index) => {
-    const currentSubjects = watch('subjects');
+    const currentSubjects = watch('subjects') || [];
     const updatedSubjects = currentSubjects.filter((_, i) => i !== index);
     setValue('subjects', updatedSubjects);
   };
 
   const handleSubjectChange = (index, value) => {
-    const currentSubjects = watch('subjects');
+    const currentSubjects = watch('subjects') || [];
     currentSubjects[index] = value;
     setValue('subjects', [...currentSubjects]);
   };
 
-  const subjectCount = watch('subjects').length;
+  const subjectCount = watch('subjects')?.length || 0;
+
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -314,32 +376,21 @@ export default function StudentEditForm({ currentStudent }) {
         </Card>
 
         {/* Save */}
-        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
-          <Stack alignItems="flex-end">
-            <LoadingButton
-              type="submit"
-              variant="contained"
-              loading={isLoading}
-            >
-              Save
-            </LoadingButton>
-          </Stack>
-        </Box>
+       
+      
+        <Stack alignItems="flex-end" sx={{ mt: 2 }}>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            onClick={isFormPopulated ? handleUpdateClick : handleNextClick}
+
+            loading={isNextLoading}
+          >
+            {isFormPopulated ? 'Update' : 'Save'}
+          </LoadingButton>
+        </Stack>
       </Box>
+      {/* </Box> */}
     </FormProvider>
   );
 }
-
-StudentEditForm.propTypes = {
-  currentStudent: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    domain: PropTypes.string,
-    subDomain: PropTypes.string,
-    name: PropTypes.string,
-    phone: PropTypes.string,
-    guardianName: PropTypes.string,
-    guardianPhone: PropTypes.string,
-    address: PropTypes.string,
-    subjects: PropTypes.arrayOf(PropTypes.string),
-  }),
-};
