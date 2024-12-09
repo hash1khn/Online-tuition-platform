@@ -3,9 +3,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // Async thunk for getting student data
 export const fetchStudentData = createAsyncThunk(
   'student/fetchStudentData',
-  async (studentId, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/api/students/${studentId}`, {
+      const response = await fetch(`/api/students/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
