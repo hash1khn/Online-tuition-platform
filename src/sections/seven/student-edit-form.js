@@ -152,6 +152,7 @@ export default function StudentEditForm() {
       console.log('hello',payload)
       await dispatch(saveStudentData(payload));
       alert('Form submitted successfully!');
+      router.push(paths.dashboard.user.cards)
     } catch (error) {
       console.error('Error submitting form:', error);
     } finally {
