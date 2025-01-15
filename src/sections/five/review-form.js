@@ -44,32 +44,41 @@ export default function ReviewForm({ onSubmitReview, open, onClose }) {
     },
   });
 
-  const { handleSubmit, control, formState: { errors } } = methods;
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = methods;
 
   const handleReviewSubmit = async (data) => {
     setIsLoading(true);
 
     try {
+      console.log('Submitting review...');
+
       // Simulate API submission
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      if (onSubmitReview) onSubmitReview(data);
+      if (onSubmitReview) await onSubmitReview(data);
 
       setSnackbarMessage('Review submitted successfully!');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
 
-      onClose(); // Close the dialog on successful submission
+      console.log('Snackbar opened: success');
     } catch (error) {
       setSnackbarMessage('Failed to submit the review.');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
+
+      console.error('Snackbar opened: error', error);
     } finally {
       setIsLoading(false);
+      onClose();
     }
   };
 
-  const handleSnackbarClose = () => {
+  const handleSnackbarClose = (_, reason) => {
+    if (reason === 'clickaway') return; // Prevent Snackbar from closing on clickaway
     setSnackbarOpen(false);
   };
 
@@ -137,7 +146,11 @@ export default function ReviewForm({ onSubmitReview, open, onClose }) {
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>

@@ -123,6 +123,10 @@ export default function   UserCardList() {
             sm: 'repeat(2, 1fr)',
             md: 'repeat(3, 1fr)',
           }}
+          sx={{
+            justifyItems: 'center',
+            width: '100%',
+          }}
         >
           {users.length > 0 ? (
             users.map((user) => <UserCard key={user.id} user={user} />)

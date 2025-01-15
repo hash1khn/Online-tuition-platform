@@ -40,7 +40,13 @@ export default function UserCard({ user }) {
 
   return (
     <>
-      <Card sx={{ textAlign: 'left', padding: 2, maxWidth: 320, boxShadow: 3 }}>
+      <Card sx={{ 
+        textAlign: 'left', 
+        padding: 2, 
+        width: '100%',  // Make card responsive
+        maxWidth: { xs: '100%', sm: 320 },  // Responsive max-width
+        boxShadow: 3 
+      }}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <Avatar
             alt={name}
@@ -72,9 +78,16 @@ export default function UserCard({ user }) {
           <Typography variant="subtitle2" color="text.secondary">
             Languages
           </Typography>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>  {/* Allow wrapping */}
             {languages.map((curr, index) => (
-              <Chip key={index} label={curr} size="small" color="primary" variant="outlined" />
+              <Chip 
+                key={index} 
+                label={curr} 
+                size="small" 
+                color="primary" 
+                variant="outlined"
+                sx={{ mb: 1 }}  // Add margin bottom for wrapped items
+              />
             ))}
           </Stack>
 
